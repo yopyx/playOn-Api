@@ -34,10 +34,23 @@ namespace DataLayer.EfCode
             modelBuilder.Entity<Video>()
                 .Property(c => c.LiveStreamingDetails)
                 .HasJsonConversion(options);
+
+            modelBuilder.Entity<SearchResultedVideo>()
+                .Property(c => c.Thumbnails)
+                .HasJsonConversion(options);
+            modelBuilder.Entity<SearchResultedVideo>()
+                .Property(c => c.Statistics)
+                .HasJsonConversion(options);
+            modelBuilder.Entity<SearchResultedVideo>()
+                .Property(c => c.LiveStreamingDetails)
+                .HasJsonConversion(options);
         }
 
         public DbSet<VideoCategory> VideoCategories { get; set; }
         public DbSet<Channel> Channels { get; set; }
         public DbSet<Video> Videos { get; set; }
+        public DbSet<SearchKey> SearchKeys { get; set; }
+        public DbSet<SearchResultedVideo> VideoResults { get; set; }
+        public DbSet<SearchSuggestions> SearchSuggestions { get; set; }
     }
 }
