@@ -48,6 +48,120 @@ namespace DataLayer.Migrations
                     b.ToTable("Channels");
                 });
 
+            modelBuilder.Entity("DataLayer.EfClasses.SearchKey", b =>
+                {
+                    b.Property<int>("SearchKeyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SearchKeyId"));
+
+                    b.Property<string>("NextToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VideoListEtag")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SearchKeyId");
+
+                    b.ToTable("SearchKeys");
+                });
+
+            modelBuilder.Entity("DataLayer.EfClasses.SearchResultedVideo", b =>
+                {
+                    b.Property<int>("SearchResultedVideoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SearchResultedVideoId"));
+
+                    b.Property<int>("ChannelId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Duration")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ListEtag")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LiveBroadcastContent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LiveStreamingDetails")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NextToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PublishedAt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SearchKeyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Statistics")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.PrimitiveCollection<string>("Tags")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Thumbnails")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SearchResultedVideoId");
+
+                    b.HasIndex("ChannelId");
+
+                    b.HasIndex("SearchKeyId");
+
+                    b.ToTable("VideoResults");
+                });
+
+            modelBuilder.Entity("DataLayer.EfClasses.SearchSuggestions", b =>
+                {
+                    b.Property<int>("SearchSuggestionsId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SearchSuggestionsId"));
+
+                    b.PrimitiveCollection<string>("Suggestions")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SearchSuggestionsId");
+
+                    b.ToTable("SearchSuggestions");
+                });
+
             modelBuilder.Entity("DataLayer.EfClasses.Video", b =>
                 {
                     b.Property<int>("VideoId")
@@ -140,6 +254,25 @@ namespace DataLayer.Migrations
                     b.ToTable("VideoCategories");
                 });
 
+            modelBuilder.Entity("DataLayer.EfClasses.SearchResultedVideo", b =>
+                {
+                    b.HasOne("DataLayer.EfClasses.Channel", "Channel")
+                        .WithMany("SearchResultedVideos")
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLayer.EfClasses.SearchKey", "SearchKey")
+                        .WithMany("Videos")
+                        .HasForeignKey("SearchKeyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Channel");
+
+                    b.Navigation("SearchKey");
+                });
+
             modelBuilder.Entity("DataLayer.EfClasses.Video", b =>
                 {
                     b.HasOne("DataLayer.EfClasses.Channel", "Channel")
@@ -160,6 +293,13 @@ namespace DataLayer.Migrations
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.Channel", b =>
+                {
+                    b.Navigation("SearchResultedVideos");
+
+                    b.Navigation("Videos");
+                });
+
+            modelBuilder.Entity("DataLayer.EfClasses.SearchKey", b =>
                 {
                     b.Navigation("Videos");
                 });
