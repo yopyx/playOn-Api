@@ -48,6 +48,101 @@ namespace DataLayer.Migrations
                     b.ToTable("Channels");
                 });
 
+            modelBuilder.Entity("DataLayer.EfClasses.Comment", b =>
+                {
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+
+                    b.Property<string>("AuthorDisplayName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AuthorProfileImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("LikeCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ListEtag")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NextToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PublishedAt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TextOriginal")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VideoWatchedId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CommentId");
+
+                    b.HasIndex("VideoWatchedId");
+
+                    b.ToTable("Comment");
+                });
+
+            modelBuilder.Entity("DataLayer.EfClasses.LiveChatComment", b =>
+                {
+                    b.Property<int>("LiveChatCommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LiveChatCommentId"));
+
+                    b.Property<string>("CId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayMessage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ListEtag")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NextToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProfileImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PublishedAt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VideoWatchedId")
+                        .HasColumnType("int");
+
+                    b.HasKey("LiveChatCommentId");
+
+                    b.HasIndex("VideoWatchedId");
+
+                    b.ToTable("LiveChatComment");
+                });
+
             modelBuilder.Entity("DataLayer.EfClasses.SearchKey", b =>
                 {
                     b.Property<int>("SearchKeyId")
@@ -254,6 +349,91 @@ namespace DataLayer.Migrations
                     b.ToTable("VideoCategories");
                 });
 
+            modelBuilder.Entity("DataLayer.EfClasses.VideoWatched", b =>
+                {
+                    b.Property<int>("VideoWatchedId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VideoWatchedId"));
+
+                    b.Property<int>("ChannelId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Duration")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ListEtag")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LiveBroadcastContent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LiveStreamingDetails")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NextToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PublishedAt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Statistics")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.PrimitiveCollection<string>("Tags")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Thumbnails")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("VideoWatchedId");
+
+                    b.HasIndex("ChannelId");
+
+                    b.ToTable("VideosWatched");
+                });
+
+            modelBuilder.Entity("DataLayer.EfClasses.Comment", b =>
+                {
+                    b.HasOne("DataLayer.EfClasses.VideoWatched", "VideoWatched")
+                        .WithMany("Comments")
+                        .HasForeignKey("VideoWatchedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("VideoWatched");
+                });
+
+            modelBuilder.Entity("DataLayer.EfClasses.LiveChatComment", b =>
+                {
+                    b.HasOne("DataLayer.EfClasses.VideoWatched", "VideoWatched")
+                        .WithMany("LiveChatComments")
+                        .HasForeignKey("VideoWatchedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("VideoWatched");
+                });
+
             modelBuilder.Entity("DataLayer.EfClasses.SearchResultedVideo", b =>
                 {
                     b.HasOne("DataLayer.EfClasses.Channel", "Channel")
@@ -292,6 +472,17 @@ namespace DataLayer.Migrations
                     b.Navigation("VideoCategory");
                 });
 
+            modelBuilder.Entity("DataLayer.EfClasses.VideoWatched", b =>
+                {
+                    b.HasOne("DataLayer.EfClasses.Channel", "Channel")
+                        .WithMany()
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Channel");
+                });
+
             modelBuilder.Entity("DataLayer.EfClasses.Channel", b =>
                 {
                     b.Navigation("SearchResultedVideos");
@@ -307,6 +498,13 @@ namespace DataLayer.Migrations
             modelBuilder.Entity("DataLayer.EfClasses.VideoCategory", b =>
                 {
                     b.Navigation("Videos");
+                });
+
+            modelBuilder.Entity("DataLayer.EfClasses.VideoWatched", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("LiveChatComments");
                 });
 #pragma warning restore 612, 618
         }
