@@ -44,6 +44,16 @@ namespace DataLayer.EfCode
             modelBuilder.Entity<SearchResultedVideo>()
                 .Property(c => c.LiveStreamingDetails)
                 .HasJsonConversion(options);
+
+            modelBuilder.Entity<VideoWatched>()
+                .Property(c => c.Thumbnails)
+                .HasJsonConversion(options);
+            modelBuilder.Entity<VideoWatched>()
+                .Property(c => c.Statistics)
+                .HasJsonConversion(options);
+            modelBuilder.Entity<VideoWatched>()
+                .Property(c => c.LiveStreamingDetails)
+                .HasJsonConversion(options);
         }
 
         public DbSet<VideoCategory> VideoCategories { get; set; }
@@ -52,5 +62,6 @@ namespace DataLayer.EfCode
         public DbSet<SearchKey> SearchKeys { get; set; }
         public DbSet<SearchResultedVideo> VideoResults { get; set; }
         public DbSet<SearchSuggestions> SearchSuggestions { get; set; }
+        public DbSet<VideoWatched> VideosWatched { get; set; }
     }
 }
