@@ -187,6 +187,10 @@ namespace DataLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Etag")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ListEtag")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -273,6 +277,10 @@ namespace DataLayer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Duration")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Etag")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -365,6 +373,10 @@ namespace DataLayer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Duration")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Etag")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
