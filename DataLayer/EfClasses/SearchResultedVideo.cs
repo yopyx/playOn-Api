@@ -20,6 +20,7 @@ namespace DataLayer.EfClasses
         public string Duration { get; set; } = string.Empty;
         public Dictionary<string, string>? Statistics { get; set; } = [];
         public Dictionary<string, string>? LiveStreamingDetails { get; set; }
+        public string Etag { get; set; } = string.Empty;
         public string ListEtag { get; set; } = string.Empty;
         public string NextToken { get; set; } = string.Empty;
 
