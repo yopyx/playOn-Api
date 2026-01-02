@@ -94,7 +94,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("VideoWatchedId");
 
-                    b.ToTable("Comment");
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.LiveChatComment", b =>
@@ -141,6 +141,51 @@ namespace DataLayer.Migrations
                     b.HasIndex("VideoWatchedId");
 
                     b.ToTable("LiveChatComment");
+                });
+
+            modelBuilder.Entity("DataLayer.EfClasses.NestedComment", b =>
+                {
+                    b.Property<int>("NestedCommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NestedCommentId"));
+
+                    b.Property<string>("AuthorDisplayName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AuthorProfileImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CommentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LikeCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ParentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PublishedAt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TextOriginal")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("NestedCommentId");
+
+                    b.HasIndex("CommentId");
+
+                    b.ToTable("NestedComment");
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.SearchKey", b =>
@@ -446,6 +491,17 @@ namespace DataLayer.Migrations
                     b.Navigation("VideoWatched");
                 });
 
+            modelBuilder.Entity("DataLayer.EfClasses.NestedComment", b =>
+                {
+                    b.HasOne("DataLayer.EfClasses.Comment", "Comment")
+                        .WithMany("Replies")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Comment");
+                });
+
             modelBuilder.Entity("DataLayer.EfClasses.SearchResultedVideo", b =>
                 {
                     b.HasOne("DataLayer.EfClasses.Channel", "Channel")
@@ -500,6 +556,11 @@ namespace DataLayer.Migrations
                     b.Navigation("SearchResultedVideos");
 
                     b.Navigation("Videos");
+                });
+
+            modelBuilder.Entity("DataLayer.EfClasses.Comment", b =>
+                {
+                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.SearchKey", b =>
