@@ -63,5 +63,6 @@ namespace DataLayer.EfCode
         public DbSet<SearchResultedVideo> VideoResults { get; set; }
         public DbSet<SearchSuggestions> SearchSuggestions { get; set; }
         public DbSet<VideoWatched> VideosWatched { get; set; }
+        public DbSet<Comment> Comments { get; set; }
     }
 }
