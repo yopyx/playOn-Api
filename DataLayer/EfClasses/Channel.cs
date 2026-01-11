@@ -7,8 +7,8 @@ namespace DataLayer.EfClasses
         public int ChannelId { get; set; }
         public string ChId { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
-        public Dictionary<string, ThumbnailDetails>? Thumbnails { get; set; } = [];
-        public Statistics? Statistics { get; set; } = new();
+        public Dictionary<string, ThumbnailDetails> Thumbnails { get; set; } = [];
+        public Statistics Statistics { get; set; } = new();
 
 
         //Relationships

@@ -11,7 +11,7 @@ namespace DataLayer.EfClasses
         public int SearchKeyId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string VideoListEtag { get; set; } = string.Empty;
-        public string NextToken { get; set; } = string.Empty;
+        public string? NextToken { get; set; }
 
         //Relationships
 

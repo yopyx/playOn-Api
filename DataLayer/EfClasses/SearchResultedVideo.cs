@@ -14,15 +14,15 @@ namespace DataLayer.EfClasses
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string PublishedAt { get; set; } = string.Empty;
-        public Dictionary<string, ThumbnailDetails>? Thumbnails { get; set; } = [];
+        public Dictionary<string, ThumbnailDetails> Thumbnails { get; set; } = [];
         public string[] Tags { get; set; } = [];
         public string LiveBroadcastContent { get; set; } = string.Empty;
         public string Duration { get; set; } = string.Empty;
-        public Dictionary<string, string>? Statistics { get; set; } = [];
-        public Dictionary<string, string>? LiveStreamingDetails { get; set; }
+        public Dictionary<string, string> Statistics { get; set; } = [];
+        public Dictionary<string, string> LiveStreamingDetails { get; set; } = [];
         public string Etag { get; set; } = string.Empty;
         public string ListEtag { get; set; } = string.Empty;
-        public string NextToken { get; set; } = string.Empty;
+        public string? NextToken { get; set; }
 
         //Relationships
         public int ChannelId { get; set; }

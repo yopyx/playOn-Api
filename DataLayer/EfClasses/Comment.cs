@@ -16,13 +16,13 @@ namespace DataLayer.EfClasses
         public int LikeCount { get; set; }
         public string PublishedAt { get; set; } = string.Empty;
         public string ListEtag { get; set; } = string.Empty;
-        public string NextToken { get; set; } = string.Empty;
-        public NestedComment[] Replies { get; set; } = [];
+        public string? NextToken { get; set; }
 
 
         //Relationships
 
         public int VideoWatchedId { get; set; }
         public VideoWatched VideoWatched { get; set; } = null!;  // navigation property
+        public NestedComment[] NestedComments { get; set; } = [];
     }
 }
