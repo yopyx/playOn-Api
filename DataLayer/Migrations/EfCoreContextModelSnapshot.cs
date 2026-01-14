@@ -47,7 +47,7 @@ namespace DataLayer.Migrations
 
                     b.HasKey("ChannelId");
 
-                    b.ToTable("Channels");
+                    b.ToTable("Channels", (string)null);
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.Comment", b =>
@@ -95,7 +95,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("VideoWatchedId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.LiveChatComment", b =>
@@ -140,7 +140,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("VideoWatchedId");
 
-                    b.ToTable("LiveChatComment");
+                    b.ToTable("LiveChatComment", (string)null);
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.NestedComment", b =>
@@ -185,7 +185,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("CommentId");
 
-                    b.ToTable("NestedComment");
+                    b.ToTable("NestedComment", (string)null);
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.SearchKey", b =>
@@ -209,7 +209,7 @@ namespace DataLayer.Migrations
 
                     b.HasKey("SearchKeyId");
 
-                    b.ToTable("SearchKeys");
+                    b.ToTable("SearchKeys", (string)null);
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.SearchResultedVideo", b =>
@@ -283,7 +283,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("SearchKeyId");
 
-                    b.ToTable("VideoResults");
+                    b.ToTable("VideoResults", (string)null);
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.SearchSuggestions", b =>
@@ -304,7 +304,7 @@ namespace DataLayer.Migrations
 
                     b.HasKey("SearchSuggestionsId");
 
-                    b.ToTable("SearchSuggestions");
+                    b.ToTable("SearchSuggestions", (string)null);
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.Video", b =>
@@ -378,7 +378,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("VideoCategoryId");
 
-                    b.ToTable("Videos");
+                    b.ToTable("Videos", (string)null);
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.VideoCategory", b =>
@@ -402,7 +402,7 @@ namespace DataLayer.Migrations
 
                     b.HasKey("VideoCategoryId");
 
-                    b.ToTable("VideoCategories");
+                    b.ToTable("VideoCategories", (string)null);
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.VideoWatched", b =>
@@ -464,7 +464,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("ChannelId");
 
-                    b.ToTable("VideosWatched");
+                    b.ToTable("VideosWatched", (string)null);
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.Comment", b =>

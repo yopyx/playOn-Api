@@ -26,6 +26,9 @@ namespace DataLayer.EfCode
                 .HasJsonConversion(options);
 
             modelBuilder.Entity<Video>()
+                .Property(c => c.Tags)
+                .HasJsonConversion(options);
+            modelBuilder.Entity<Video>()
                 .Property(c => c.Thumbnails)
                 .HasJsonConversion(options);
             modelBuilder.Entity<Video>()
@@ -36,6 +39,9 @@ namespace DataLayer.EfCode
                 .HasJsonConversion(options);
 
             modelBuilder.Entity<SearchResultedVideo>()
+                .Property(c => c.Tags)
+                .HasJsonConversion(options);
+            modelBuilder.Entity<SearchResultedVideo>()
                 .Property(c => c.Thumbnails)
                 .HasJsonConversion(options);
             modelBuilder.Entity<SearchResultedVideo>()
@@ -45,6 +51,13 @@ namespace DataLayer.EfCode
                 .Property(c => c.LiveStreamingDetails)
                 .HasJsonConversion(options);
 
+            modelBuilder.Entity<SearchSuggestions>()
+                .Property(c => c.Suggestions)
+                .HasJsonConversion(options);
+
+            modelBuilder.Entity<VideoWatched>()
+                .Property(c => c.Tags)
+                .HasJsonConversion(options);
             modelBuilder.Entity<VideoWatched>()
                 .Property(c => c.Thumbnails)
                 .HasJsonConversion(options);
