@@ -16,7 +16,7 @@ namespace DataLayer.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "8.0.22")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -47,7 +47,7 @@ namespace DataLayer.Migrations
 
                     b.HasKey("ChannelId");
 
-                    b.ToTable("Channels", (string)null);
+                    b.ToTable("Channels");
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.Comment", b =>
@@ -88,6 +88,9 @@ namespace DataLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("TotalReplyCount")
+                        .HasColumnType("int");
+
                     b.Property<int>("VideoWatchedId")
                         .HasColumnType("int");
 
@@ -95,7 +98,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("VideoWatchedId");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.LiveChatComment", b =>
@@ -125,6 +128,10 @@ namespace DataLayer.Migrations
                     b.Property<string>("NextToken")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PageNo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ProfileImageUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -140,7 +147,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("VideoWatchedId");
 
-                    b.ToTable("LiveChatComment", (string)null);
+                    b.ToTable("LiveComments");
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.NestedComment", b =>
@@ -185,7 +192,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("CommentId");
 
-                    b.ToTable("NestedComment", (string)null);
+                    b.ToTable("NestedComment");
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.SearchKey", b =>
@@ -209,7 +216,7 @@ namespace DataLayer.Migrations
 
                     b.HasKey("SearchKeyId");
 
-                    b.ToTable("SearchKeys", (string)null);
+                    b.ToTable("SearchKeys");
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.SearchResultedVideo", b =>
@@ -261,7 +268,7 @@ namespace DataLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.PrimitiveCollection<string>("Tags")
+                    b.Property<string>("Tags")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -283,7 +290,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("SearchKeyId");
 
-                    b.ToTable("VideoResults", (string)null);
+                    b.ToTable("VideoResults");
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.SearchSuggestions", b =>
@@ -294,7 +301,7 @@ namespace DataLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SearchSuggestionsId"));
 
-                    b.PrimitiveCollection<string>("Suggestions")
+                    b.Property<string>("Suggestions")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -304,7 +311,7 @@ namespace DataLayer.Migrations
 
                     b.HasKey("SearchSuggestionsId");
 
-                    b.ToTable("SearchSuggestions", (string)null);
+                    b.ToTable("SearchSuggestions");
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.Video", b =>
@@ -353,7 +360,7 @@ namespace DataLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.PrimitiveCollection<string>("Tags")
+                    b.Property<string>("Tags")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -378,7 +385,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("VideoCategoryId");
 
-                    b.ToTable("Videos", (string)null);
+                    b.ToTable("Videos");
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.VideoCategory", b =>
@@ -402,7 +409,7 @@ namespace DataLayer.Migrations
 
                     b.HasKey("VideoCategoryId");
 
-                    b.ToTable("VideoCategories", (string)null);
+                    b.ToTable("VideoCategories");
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.VideoWatched", b =>
@@ -444,7 +451,7 @@ namespace DataLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.PrimitiveCollection<string>("Tags")
+                    b.Property<string>("Tags")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -464,7 +471,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("ChannelId");
 
-                    b.ToTable("VideosWatched", (string)null);
+                    b.ToTable("VideosWatched");
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.Comment", b =>
@@ -492,7 +499,7 @@ namespace DataLayer.Migrations
             modelBuilder.Entity("DataLayer.EfClasses.NestedComment", b =>
                 {
                     b.HasOne("DataLayer.EfClasses.Comment", "Comment")
-                        .WithMany("Replies")
+                        .WithMany("NestedComments")
                         .HasForeignKey("CommentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -558,7 +565,7 @@ namespace DataLayer.Migrations
 
             modelBuilder.Entity("DataLayer.EfClasses.Comment", b =>
                 {
-                    b.Navigation("Replies");
+                    b.Navigation("NestedComments");
                 });
 
             modelBuilder.Entity("DataLayer.EfClasses.SearchKey", b =>
