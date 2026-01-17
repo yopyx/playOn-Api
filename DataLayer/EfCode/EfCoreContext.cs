@@ -77,5 +77,6 @@ namespace DataLayer.EfCode
         public DbSet<SearchSuggestions> SearchSuggestions { get; set; }
         public DbSet<VideoWatched> VideosWatched { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<LiveChatComment> LiveComments { get; set; }
     }
 }
