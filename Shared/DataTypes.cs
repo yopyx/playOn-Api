@@ -50,7 +50,6 @@
             public string PublishedAt { get; set; } = string.Empty;
             public string UpdatedAt { get; set; } = string.Empty;
             public string? ParentId { get; set; }
-            public string? TotalReplyCount { get; set; }
         }
         public class TopLevelComment
         {
@@ -69,16 +68,17 @@
             public int TotalReplyCount { get; set; }
             public bool IsPublic { get; set; }
         }
-        public class NestedComment
+        public class NestedCommentFromApi
         {
             public string Kind { get; set; } = string.Empty;
             public string Etag { get; set; } = string.Empty;
             public string Id { get; set; } = string.Empty;
             public Snippet5 Snippet { get; set; } = new();
-            public Replies? Replies { get; set; }
+            //public NestedCommentFromApi[]? Replies { get; set; }
         }
-        public class Replies {
-            public NestedComment[] Comments { get; set; } = [];
+        public class Replies
+        {
+            public NestedCommentFromApi[] Comments { get; set; } = [];
         }
         public class CommentFromApi
         {
