@@ -14,6 +14,7 @@ namespace DataLayer.EfClasses
         public string AuthorDisplayName { get; set; } = string.Empty;
         public string AuthorProfileImageUrl { get; set; } = string.Empty;
         public int LikeCount { get; set; }
+        public int TotalReplyCount { get; set; }
         public string PublishedAt { get; set; } = string.Empty;
         public string ListEtag { get; set; } = string.Empty;
         public string? NextToken { get; set; }
@@ -23,6 +24,6 @@ namespace DataLayer.EfClasses
 
         public int VideoWatchedId { get; set; }
         public VideoWatched VideoWatched { get; set; } = null!;  // navigation property
-        public NestedComment[] NestedComments { get; set; } = [];
+        public ICollection<NestedComment> NestedComments { get; set; } = [];
     }
 }
