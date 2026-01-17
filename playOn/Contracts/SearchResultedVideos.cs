@@ -30,8 +30,8 @@ namespace playOn.Contracts
     {
         public string Kind { get; set; } = string.Empty;
         public string Etag { get; set; } = string.Empty;
-        public string? NextPageToken { get; set; } = string.Empty;
-        public string? PrevPageToken { get; set; } = string.Empty;
+        public string? NextPageToken { get; set; }
+        public string? PrevPageToken { get; set; }
         public string RegionCode { get; set; } = string.Empty;
         public PageInfo PageInfo { get; set; } = new();
         public Item2[] Items { get; set; } = [];

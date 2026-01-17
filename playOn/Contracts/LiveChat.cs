@@ -8,8 +8,8 @@ namespace playOn.Contracts
         public string Etag { get; set; } = string.Empty;
         public int PollingIntervalMillis { get; set; }
         public PageInfo PageInfo { get; set; } = new();
-        public string? NextPageToken { get; set; } = string.Empty;
-        public string? PrevPageToken { get; set; } = string.Empty;
+        public string? NextPageToken { get; set; }
+        public string? PrevPageToken { get; set; }
         public LiveCommentFromApi[] Items { get; set; } = [];
     }
 }

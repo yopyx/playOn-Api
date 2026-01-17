@@ -7,7 +7,7 @@ namespace playOn.Contracts
     {
         public string Kind { get; set; } = string.Empty;
         public string Etag { get; set; } = string.Empty;
-        public string? NextPageToken { get; set; } = string.Empty;
+        public string? NextPageToken { get; set; }
         public PageInfo PageInfo { get; set; } = new();
         public CommentFromApi[] Items { get; set; } = [];
     }

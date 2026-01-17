@@ -13,8 +13,8 @@ namespace playOn.Contracts
         public string Kind { get; set; } = string.Empty;
         public string Etag { get; set; } = string.Empty;
         public VideoDataFromApi[] Items { get; set; } = [];
-        public string? NextPageToken { get; set; } = string.Empty;
-        public string? PrevPageToken { get; set; } = string.Empty;
+        public string? NextPageToken { get; set; }
+        public string? PrevPageToken { get; set; }
         public PageInfo PageInfo { get; set; } = new();
     }
 }
