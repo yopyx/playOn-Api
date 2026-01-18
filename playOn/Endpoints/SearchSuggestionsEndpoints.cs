@@ -24,6 +24,22 @@ namespace playOn.Endpoints
                 {
                     return TypedResults.Ok(entity.Suggestions);
                 }
+
+                //API Call
+                var client = new HttpClient();
+                if (q.Trim() == string.Empty)
+                {
+                    return Results.ValidationProblem(new Dictionary<string, string[]>{
+                        {"q", new[] {"A non nullified search query input must be provided"}}
+                    });
+                }
+                var response = await client.GetAsync($@"https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q={q}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return Results.Problem($"API call failed: {response.StatusCode}");
+                }
+                JsonElement json = await response.Content.ReadFromJsonAsync<JsonElement>();
+                var list = json[1].EnumerateArray().Select(x => x.GetString()).ToArray();
             });
         }
     }
