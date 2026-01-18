@@ -18,5 +18,15 @@ namespace ServiceLayer.VideoServices.QueryObjects
                 Title = category.Title,
             });
         }
+
+        public static IQueryable<VideoCategoryDto> MapCategoryToDto(this IQueryable<VideoCategoryFromApi> videoCategories)
+        {
+            return videoCategories.Select(category => new VideoCategoryDto
+            {
+                Id = category.Id,
+                Etag = category.Etag,
+                Title = category.Snippet.Title,
+            });
+        }
     }
 }
