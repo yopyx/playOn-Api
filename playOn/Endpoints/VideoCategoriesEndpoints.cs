@@ -38,6 +38,14 @@ namespace playOn.Endpoints
                 }
 
                 var filteredItems = json!.Items.Where(item => item.Snippet.Assignable == true).ToList();
+
+                //Database Update
+                await db.AddCategoriesToEntity(filteredItems);
+
+                //Mapping filteredItems to Dto
+                var categories = db.VideoCategories.MapCategoryEntityToDto();
+
+                return TypedResults.Ok(categories);
             });
         }
     }
