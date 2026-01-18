@@ -44,6 +44,19 @@ namespace playOn.Endpoints
                     var emptyValue = Enumerable.Empty<VideoCardDto>().AsQueryable();
                     return TypedResults.Ok(new VideoCardListDto { VideoCardList = emptyValue, QueryNextPage = false});
                 }
+
+                //Extracting channels
+                var channelIds = json.Items.Select(v => v.Snippet.ChannelId).Distinct();
+                var channels = await helpers.GetChannelsAsync(channelIds);
+
+                var category = await db.VideoCategories.FirstOrDefaultAsync(c => c.VCId == VideoCategoryId);
+
+                //Update Database
+                await db.AddVideosToEntityAsync(json.Items, category!,channels, json.Etag, json?.NextPageToken);
+
+                var videoCardsToDto = channels.MapVideoCardToDto(json!.Items, json.Etag);
+                var data = new VideoCardListDto { VideoCardList = videoCardsToDto, QueryNextPage = json.NextPageToken != null };
+                return TypedResults.Ok(data);
             });
         }
     }
