@@ -1,6 +1,9 @@
 using System;
 using DataLayer.EfCode;
 using Microsoft.EntityFrameworkCore;
+using playOn.Endpoints;
+using playOn.Helpers;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
@@ -22,6 +25,8 @@ builder.Services.AddDbContext<EfCoreContext>(options =>
 {
     options.UseSqlServer(connection);
 });
+// Registering ChannelHelpers class
+builder.Services.AddScoped<IChannelHelpers, ChannelHelpers>();
 var app = builder.Build();
 
 
@@ -35,4 +40,5 @@ if (app.Environment.IsDevelopment()) {
 app.UseHttpsRedirection();
 
 
+app.MapVideoCategoriesEndpoints();
 app.Run();
