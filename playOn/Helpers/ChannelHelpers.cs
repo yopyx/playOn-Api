@@ -49,6 +49,14 @@ namespace playOn.Helpers
             {
                 return emptyValue;
             }
+
+            //Database Update
+            await _db.AddChannelsToEntity(json.Items);
+
+            //Mapping entities to Dto
+            var channels = await _db.Channels.Where(c => channelsIds.Contains(c.ChId)).ToListAsync();
+
+            return channels.AsQueryable();
         }
     }
 }
