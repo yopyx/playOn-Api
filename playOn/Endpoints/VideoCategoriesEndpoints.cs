@@ -21,6 +21,23 @@ namespace playOn.Endpoints
                 {
                     return TypedResults.Ok(db.VideoCategories.MapCategoryEntityToDto());
                 }
+
+                //API Call
+                var client = factory.CreateClient("YouTubeClient");
+                string apiKey = configuration["YouTube:ApiKey"]!;
+                var response = await client.GetAsync($"videoCategories?part=snippet&regionCode=US&key={apiKey}");
+
+                if (!response.IsSuccessStatusCode) { //API Call Fail Check
+                    return Results.Problem($"API call failed: {response.StatusCode}");
+                }
+
+                var json = await response.Content.ReadFromJsonAsync<VideoCategories>();
+                if(json?.Items == null||json.Items.Count==0)
+                {
+                    return TypedResults.Ok(Enumerable.Empty<VideoCategoryDto>().AsQueryable());
+                }
+
+                var filteredItems = json!.Items.Where(item => item.Snippet.Assignable == true).ToList();
             });
         }
     }
