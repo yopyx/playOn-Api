@@ -28,6 +28,22 @@ namespace playOn.Endpoints
                         .MapVideoEntityToDto();
                     return TypedResults.Ok(new VideoCardListDto { VideoCardList = videoEntities, QueryNextPage = nextToken != null });
                 }
+
+                //API Call
+                var apiKey = configuration["YouTube:ApiKey"];
+                var client = factory.CreateClient("YouTubeClient");
+                var response = await client.GetAsync($"videos?part=snippet%2CcontentDetails%2Cstatistics&chart=mostPopular&maxResults=12{(nextToken != null ? "&pageToken=" + nextToken : "")}&regionCode=US&videoCategoryId={VideoCategoryId}&key={apiKey}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return Results.Problem($"API call failed: {response.StatusCode}");
+                }
+                var json = await response.Content.ReadFromJsonAsync<VideosList>();
+                
+                if (json!.Items.Length==0)
+                {
+                    var emptyValue = Enumerable.Empty<VideoCardDto>().AsQueryable();
+                    return TypedResults.Ok(new VideoCardListDto { VideoCardList = emptyValue, QueryNextPage = false});
+                }
             });
         }
     }
