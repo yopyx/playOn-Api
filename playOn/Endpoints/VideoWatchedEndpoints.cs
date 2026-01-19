@@ -38,6 +38,23 @@ namespace playOn.Endpoints
 
                     return TypedResults.Ok(searchResult.MapOneResultEntityToDto());
                 }
+
+
+                //API Call for fetching videos ids
+                var apiKey = configuration["YouTube:ApiKey"];
+                var client = factory.CreateClient("YouTubeClient");
+                var response = await client.GetAsync($"videos?part=snippet%2CcontentDetails%2Cstatistics%2CliveStreamingDetails&id={videoId}&key={apiKey}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return Results.Problem($"API call failed: {response.StatusCode}");
+                }
+                var json = await response.Content.ReadFromJsonAsync<VideosList>();
+                if (json?.Items is null||json.Items.Length==0)
+                {
+                    var emptyValue = Array.Empty<VideoCardDto>();
+                    return TypedResults.Ok(emptyValue);
+                }
+
             });
         }
     }
