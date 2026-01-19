@@ -31,5 +31,26 @@ namespace DataLayer.QueryObjects
             await db.VideosWatched.AddAsync(entity);
             await db.SaveChangesAsync();
         }
+
+        public static async Task AddResultToWatchedEntityAsync(this EfCoreContext db, SearchResultedVideo v)
+        {
+            var entity = new VideoWatched
+            {
+                VId = v.VId,
+                Title = v.Title,
+                Description = v.Description,
+                PublishedAt = v.PublishedAt,
+                Thumbnails = v.Thumbnails,
+                Tags = v.Tags,
+                LiveBroadcastContent = v.LiveBroadcastContent,
+                Duration = v.Duration,
+                Statistics = v.Statistics,
+                LiveStreamingDetails = v.LiveStreamingDetails,
+                Etag = v.Etag,
+                Channel = v.Channel,
+            };
+            await db.VideosWatched.AddAsync(entity);
+            await db.SaveChangesAsync();
+        }
     }
 }
