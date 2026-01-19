@@ -55,6 +55,15 @@ namespace playOn.Endpoints
                     return TypedResults.Ok(emptyValue);
                 }
 
+                //Extracting channels
+                var channelId = json.Items[0].Snippet.ChannelId;
+                var channelsList = await helpers.GetChannelsAsync([channelId]);
+
+                //Updating Database
+                await db.AddApiDataToWatchedEntityAsync(channelsList, json.Items[0]);
+
+                var videoCardsToDto = channelsList.MapVideoCardToDto(json.Items, json.Etag).First();
+                return TypedResults.Ok(videoCardsToDto);
             });
         }
     }
