@@ -54,7 +54,29 @@ namespace ServiceLayer.VideoServices.QueryObjects
                 LiveStreamingDetails = v.LiveStreamingDetails,
             };
         }
-       
+        public static VideoCardDto MapOneVideoEntityToDto(this Video v)
+        {
+            return new VideoCardDto
+            {
+                VideoId = v.VId,
+                ChannelId = v.Channel.ChId,
+                Title = v.Title,
+                ChannelTitle = v.Channel.Title,
+                Description = v.Description,
+                PublishedAt = v.PublishedAt,
+                Thumbnails = v.Thumbnails,
+                ChannelThumbnails = v.Channel.Thumbnails,
+                Tags = v.Tags,
+                ListEtag = v.ListEtag,
+                Etag = v.Etag,
+                LiveBroadcastContent = v.LiveBroadcastContent,
+                Duration = v.Duration,
+                Statistics = v.Statistics,
+                SubscriberCount = v.Channel.Statistics!.SubscriberCount,
+                LiveStreamingDetails = v.LiveStreamingDetails,
+            };
+        }
+
         public static IQueryable<VideoCardDto> MapVideoCardToDto(this IQueryable<Channel> channels, VideoDataFromApi[] videos, string listEtag) {
             var hashMap = new Dictionary<string, Channel>();
             foreach (var c in channels) {
