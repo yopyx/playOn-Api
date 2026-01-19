@@ -20,6 +20,18 @@ namespace playOn.Helpers
             //Extracting channels
             var channelIds = list.Items.Select(v => v.Snippet.ChannelId).Distinct();
             var channels = await _helpers.GetChannelsAsync(channelIds);
+
+            //Update Database
+            var searchKeyEntity = key ?? new SearchKey
+            {
+                Title = q,
+                NextToken = list?.NextPageToken,
+                VideoListEtag = list!.Etag
+            };
+            await _db.AddResultsToEntityAsync(list.Items, channels, searchKeyEntity);
+
+            var videoCardsToDto = channels.MapVideoCardToDto(list.Items, list.Etag);
+            return videoCardsToDto;
         }
     }
 }
