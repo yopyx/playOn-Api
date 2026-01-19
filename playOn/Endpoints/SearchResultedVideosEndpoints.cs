@@ -58,6 +58,10 @@ namespace playOn.Endpoints
                 {
                     return TypedResults.Ok(new VideoCardListDto { VideoCardList = emptyValue, QueryNextPage = false });
                 }
+                var keyEntity = await db.SearchKeys.FirstOrDefaultAsync(k => k.Title == q);
+                var dto = await videohelpers.VideosToDtosAsync(json2,keyEntity,q);
+                var data = new VideoCardListDto { VideoCardList = dto, QueryNextPage = json.NextPageToken != null };
+                return TypedResults.Ok(data);
             });
         }
     }
