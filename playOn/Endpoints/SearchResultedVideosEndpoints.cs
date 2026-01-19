@@ -46,6 +46,18 @@ namespace playOn.Endpoints
                     return TypedResults.Ok(new VideoCardListDto { VideoCardList = emptyValue, QueryNextPage = false });
                 }
                 var videosIds = String.Join("%2C",json.Items.Select(v => v.Id.VideoId));
+
+                //API Call for fetching videos
+                var response2 = await client.GetAsync($"videos?part=snippet%2CcontentDetails%2Cstatistics%2CliveStreamingDetails&id={videosIds}&key={apiKey}");
+                if (!response2.IsSuccessStatusCode)
+                {
+                    return Results.Problem($"API call failed: {response2.StatusCode}");
+                }
+                var json2 = await response2.Content.ReadFromJsonAsync<VideosList>();
+                if (json2?.Items is null || json2.Items.Length == 0)
+                {
+                    return TypedResults.Ok(new VideoCardListDto { VideoCardList = emptyValue, QueryNextPage = false });
+                }
             });
         }
     }
