@@ -12,6 +12,26 @@ namespace DataLayer.QueryObjects
 {
     public static class ChangeVideosWatched
     {
+        public static async Task AddApiDataToWatchedEntityAsync(this EfCoreContext db, IQueryable<Channel> channel, VideoDataFromApi v)
+        {
+            var entity = new VideoWatched
+            {
+                VId = v.Id,
+                Title = v.Snippet.Title,
+                Description = v.Snippet.Description,
+                PublishedAt = v.Snippet.PublishedAt,
+                Thumbnails = v.Snippet.Thumbnails,
+                Tags = v.Snippet.Tags ?? [],
+                LiveBroadcastContent = v.Snippet.LiveBroadcastContent,
+                Duration = v.ContentDetails.Duration,
+                Statistics = v.Statistics,
+                LiveStreamingDetails = v.LiveStreamingDetails ?? [],
+                Etag = v.Etag,
+                Channel = channel.First(),
+            };
+            await db.VideosWatched.AddAsync(entity);
+            await db.SaveChangesAsync();
+        }
         public static async Task AddVideoToWatchedEntityAsync(this EfCoreContext db, Video v) {
             var entity = new VideoWatched
             {
