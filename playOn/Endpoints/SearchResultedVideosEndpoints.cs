@@ -1,6 +1,7 @@
 ﻿using DataLayer.EfCode;
 using Microsoft.EntityFrameworkCore;
 using playOn.Contracts;
+using playOn.Helpers;
 using ServiceLayer.SearchResultServices.QueryObjects;
 using ServiceLayer.VideoServices;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +13,7 @@ namespace playOn.Endpoints
     {
         public static void MapSearchResultedVideosEndpoints(this WebApplication app)
         {
-            app.MapGet("/search_results", async (IHttpClientFactory factory, IConfiguration configuration, [FromServices] EfCoreContext db, string q, string pageNum) =>
+            app.MapGet("/search_results", async (IHttpClientFactory factory, IConfiguration configuration, [FromServices] EfCoreContext db, IVideoHelpers videohelpers, string q, string pageNum) =>
             {
                 //Database Query
                 q = q.Trim().ToLower();
@@ -29,6 +30,22 @@ namespace playOn.Endpoints
                         .MapVideoResultEntityToDto();
                     return TypedResults.Ok(new VideoCardListDto { VideoCardList = videoEntities, QueryNextPage = nextToken != null });
                 }
+
+                //API Call for fetching videos ids
+                var apiKey = configuration["YouTube:ApiKey"];
+                var client = factory.CreateClient("YouTubeClient");
+                var response = await client.GetAsync($"search?part=snippet&maxResults=25{(nextToken != null ? "&pageToken=" + nextToken : "")}&q={q}&key={apiKey}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return Results.Problem($"API call failed: {response.StatusCode}");
+                }
+                var json = await response.Content.ReadFromJsonAsync<SearchResultedVideos>();
+                var emptyValue = Enumerable.Empty<VideoCardDto>().AsQueryable();
+                if (json?.Items is null||json.Items.Length==0)
+                {
+                    return TypedResults.Ok(new VideoCardListDto { VideoCardList = emptyValue, QueryNextPage = false });
+                }
+                var videosIds = String.Join("%2C",json.Items.Select(v => v.Id.VideoId));
             });
         }
     }
