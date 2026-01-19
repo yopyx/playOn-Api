@@ -30,6 +30,14 @@ namespace playOn.Endpoints
 
                     return TypedResults.Ok(video.MapOneVideoEntityToDto());
                 }
+                var searchResult = await db.VideoResults.SingleOrDefaultAsync(v => v.VId == videoId);
+                if (searchResult != null)
+                {
+                    //Add video result to VideoWatched table
+                    await db.AddResultToWatchedEntityAsync(searchResult);
+
+                    return TypedResults.Ok(searchResult.MapOneResultEntityToDto());
+                }
             });
         }
     }
