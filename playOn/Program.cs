@@ -25,8 +25,13 @@ builder.Services.AddDbContext<EfCoreContext>(options =>
 {
     options.UseSqlServer(connection);
 });
+
 // Registering ChannelHelpers class
 builder.Services.AddScoped<IChannelHelpers, ChannelHelpers>();
+
+// Registering VideoHelpers class
+builder.Services.AddScoped<IVideoHelpers, VideoHelpers>();
+
 var app = builder.Build();
 
 
@@ -41,4 +46,6 @@ app.UseHttpsRedirection();
 
 
 app.MapVideoCategoriesEndpoints();
+app.MapPopularVideosEndpoints();
+app.MapSearchSuggestionsEndpoints();
 app.Run();
