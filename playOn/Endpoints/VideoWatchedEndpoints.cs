@@ -22,6 +22,14 @@ namespace playOn.Endpoints
                 {
                     return TypedResults.Ok(videoWatched.MapOneWatchedEntityToDto());
                 }
+                var video = await db.Videos.SingleOrDefaultAsync(v => v.VId == videoId);
+                if (video != null)
+                {
+                    //Add video to VideoWatched table
+                    await db.AddVideoToWatchedEntityAsync(video);
+
+                    return TypedResults.Ok(video.MapOneVideoEntityToDto());
+                }
             });
         }
     }
