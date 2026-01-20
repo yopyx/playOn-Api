@@ -34,7 +34,20 @@ builder.Services.AddScoped<IVideoHelpers, VideoHelpers>();
 
 var app = builder.Build();
 
-
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<EfCoreContext>();
+        db.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        // log critical failure
+        Console.WriteLine("Migration failed: " + ex.Message);
+        throw; // optional
+    }
+}
 
 if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
@@ -48,4 +61,9 @@ app.UseHttpsRedirection();
 app.MapVideoCategoriesEndpoints();
 app.MapPopularVideosEndpoints();
 app.MapSearchSuggestionsEndpoints();
+app.MapSearchResultedVideosEndpoints();
+app.MapVideoWatchedEndpoints();
+app.MapCommentsEndpoints();
+app.MapNestedCommentsEndpoints();
+app.MapLiveChatEndpoints();
 app.Run();
