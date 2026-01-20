@@ -44,6 +44,19 @@ namespace playOn.Endpoints
                     return Results.Problem($"API call failed: {response.StatusCode}");
                 }
                 var json = await response.Content.ReadFromJsonAsync<LiveChat>();
+
+                //Database Update
+                if (json!.Items.Length > 0) {
+                    await db.AddLiveCommentsToEntityAsync(json!.Items, watchedEntity,[videoId, json!.Etag, pageNum], json?.NextPageToken);
+                }else if (nextToken!=null && json!.Items.Length == 0 && json?.NextPageToken != null)
+                {
+                    await db.UpdateLiveCommentsTokenAsync(nextToken,json!.NextPageToken);
+                }
+
+                //Mapping json.Items to Dto
+                var comments = json!.Items.AsQueryable().MapLiveCommentToDto(json.Etag);
+                var data = new LiveCommentListDto { LiveCommentList = comments, QueryNextPage = json?.NextPageToken!=null };
+                return TypedResults.Ok(data);
             });
         }
     }
