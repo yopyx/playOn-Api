@@ -33,6 +33,17 @@ namespace playOn.Endpoints
                     
                     return TypedResults.Ok(new LiveCommentListDto { LiveCommentList = liveComments, QueryNextPage = nextToken != null });
                 }
+
+                //API Call
+                var chatId = watchedEntity!.LiveStreamingDetails["activeLiveChatId"];
+                var apiKey = configuration["YouTube:ApiKey"];
+                var client = factory.CreateClient("YouTubeClient");
+                var response = await client.GetAsync($"liveChat/messages?liveChatId={chatId}{(nextToken != null ? "&pageToken=" + nextToken : "")}&part=snippet%2CauthorDetails&key={apiKey}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return Results.Problem($"API call failed: {response.StatusCode}");
+                }
+                var json = await response.Content.ReadFromJsonAsync<LiveChat>();
             });
         }
     }
