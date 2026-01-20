@@ -44,6 +44,16 @@ namespace playOn.Endpoints
                     return Results.Problem($"API call failed: {response.StatusCode}");
                 }
                 var json = await response.Content.ReadFromJsonAsync<Comments>();
+
+                //Database Update
+                if (json!.Items.Length > 0)
+                {
+                    await db.AddCommentsToEntityAsync(json!.Items, watchedEntity,json.Etag, json?.NextPageToken);
+                }
+
+                //Mapping json.Items to Dto
+                var comments = json!.Items.AsQueryable().MapCommentToDto(json.Etag);
+                return TypedResults.Ok(new CommentsListDto { CommentsList = comments, QueryNextPage = json?.NextPageToken != null });
             });
         }
     }
