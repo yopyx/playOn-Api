@@ -13,8 +13,7 @@ namespace playOn.Endpoints
 {
     public static class CommentsEndpoints
     {
-        public static void MapCommentsEndpoints(this WebApplication app)
-        {
+        public static void MapCommentsEndpoints(this WebApplication app) {
             app.MapGet("/comments", async (IHttpClientFactory factory, IConfiguration configuration, EfCoreContext db, string videoId, string pageNum) =>
             {
                 //Database Query
@@ -35,6 +34,16 @@ namespace playOn.Endpoints
                         .MapCommentEntityToDto();
                     return TypedResults.Ok(new CommentsListDto { CommentsList = commentsList, QueryNextPage = nextToken != null });
                 }
+
+                //API Call
+                var apiKey = configuration["YouTube:ApiKey"];
+                var client = factory.CreateClient("YouTubeClient");
+                var response = await client.GetAsync($"commentThreads?part=snippet%2Creplies{(nextToken != null ? "&pageToken=" + nextToken : "")}&videoId={videoId}&key={apiKey}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return Results.Problem($"API call failed: {response.StatusCode}");
+                }
+                var json = await response.Content.ReadFromJsonAsync<Comments>();
             });
         }
     }
