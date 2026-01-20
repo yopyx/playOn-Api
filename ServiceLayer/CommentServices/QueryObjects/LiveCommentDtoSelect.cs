@@ -22,5 +22,18 @@ namespace ServiceLayer.CommentServices.QueryObjects
                 ListEtag = c.ListEtag,
             });
         }
+
+        public static IQueryable<LiveCommentDto> MapLiveCommentToDto(this IQueryable<LiveCommentFromApi> comments, string listEtag)
+        {
+            return comments.Select(c => new LiveCommentDto
+            {
+                Id = c.Id,
+                PublishedAt = c.Snippet.PublishedAt,
+                DisplayMessage = c.Snippet.DisplayMessage,
+                DisplayName = c.AuthorDetails.DisplayName,
+                ProfileImageUrl = c.AuthorDetails.ProfileImageUrl,
+                ListEtag = listEtag,
+            });
+        }
     }
 }
