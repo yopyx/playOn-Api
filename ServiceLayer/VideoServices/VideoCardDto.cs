@@ -32,4 +32,10 @@ namespace ServiceLayer.VideoServices
         public IQueryable<VideoCardDto> VideoCardList { get; set; } = Array.Empty<VideoCardDto>().AsQueryable();
         public bool QueryNextPage {  get; set; }
     }
+
+    public class VideoCardListDtoEnumerable
+    {
+        public IEnumerable<VideoCardDto> VideoCardList { get; set; } = Array.Empty<VideoCardDto>().AsQueryable();
+        public bool QueryNextPage { get; set; }
+    }
 }

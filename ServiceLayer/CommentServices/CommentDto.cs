@@ -23,4 +23,10 @@ namespace ServiceLayer.CommentServices
         public IQueryable<CommentDto> CommentsList { get; set; } = Array.Empty<CommentDto>().AsQueryable();
         public bool QueryNextPage { get; set; }
     }
+
+    public class CommentsListDtoEnumerable
+    {
+        public IEnumerable<CommentDto> CommentsList { get; set; } = Array.Empty<CommentDto>().AsQueryable();
+        public bool QueryNextPage { get; set; }
+    }
 }

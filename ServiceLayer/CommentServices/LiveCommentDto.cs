@@ -22,4 +22,9 @@ namespace ServiceLayer.CommentServices
         public IQueryable<LiveCommentDto> LiveCommentList { get; set; } = Array.Empty<LiveCommentDto>().AsQueryable();
         public bool QueryNextPage { get; set; }
     }
+    public class LiveCommentListDtoEnumerable
+    {
+        public IEnumerable<LiveCommentDto> LiveCommentList { get; set; } = Array.Empty<LiveCommentDto>().AsQueryable();
+        public bool QueryNextPage { get; set; }
+    }
 }
