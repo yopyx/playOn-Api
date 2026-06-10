@@ -42,17 +42,21 @@ namespace playOn.Helpers
             {
                 //var value = new List<ChannelDto>().AsQueryable();
                 //var value = Array.Empty<ChannelDto>().AsQueryable();
+                //Console.WriteLine("Here is the error!!!");
                 return emptyValue;
-                ; }
+            }
             var json = await response.Content.ReadFromJsonAsync<Channels>();
-            if (json?.Items is null)
+            if (json?.Items == null)
             {
+                //Console.WriteLine("Here is the error2!!!");
                 return emptyValue;
             }
 
             //Database Update
-            await _db.AddChannelsToEntity(json.Items);
-
+            if (json.Items.Length > 0) {
+                await _db.AddChannelsToEntity(json.Items);
+            }
+            
             //Mapping entities to Dto
             var channels = await _db.Channels.Where(c => channelsIds.Contains(c.ChId)).ToListAsync();
 
