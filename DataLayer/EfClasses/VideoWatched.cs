@@ -28,5 +28,6 @@ namespace DataLayer.EfClasses
         public Channel Channel { get; set; } = null!;  // navigation property
         public ICollection<Comment> Comments { get; set; } = [];
         public ICollection<LiveChatComment> LiveChatComments { get; set; } = [];
+        public ICollection<History_VideoWatched> HistoryLinks { get; set; } = []; // navigation property
     }
 }
