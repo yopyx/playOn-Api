@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using DataLayer.EfClasses;
@@ -12,8 +13,10 @@ namespace DataLayer.QueryObjects
 {
     public static class ChangeVideosWatched
     {
-        public static async Task AddApiDataToWatchedEntityAsync(this EfCoreContext db, IQueryable<Channel> channel, VideoDataFromApi v)
+        public static async Task AddApiDataToWatchedEntityAsync(this EfCoreContext db,IQueryable<Channel> channel, VideoDataFromApi v, string sub,User? user)
         {
+            var defaultChannel = await db.Channels.SingleOrDefaultAsync(c => c.ChannelId == 1);
+
             var entity = new VideoWatched
             {
                 VId = v.Id,
@@ -27,12 +30,13 @@ namespace DataLayer.QueryObjects
                 Statistics = v.Statistics,
                 LiveStreamingDetails = v.LiveStreamingDetails ?? [],
                 Etag = v.Etag,
-                Channel = channel.First(),
+                Channel = channel.SingleOrDefault()??defaultChannel!,
             };
             await db.VideosWatched.AddAsync(entity);
+            await db.AddWatchedEntityToUserHistoryAsync(user,entity,sub);
             await db.SaveChangesAsync();
         }
-        public static async Task AddVideoToWatchedEntityAsync(this EfCoreContext db, Video v) {
+        public static async Task AddVideoToWatchedEntityAsync(this EfCoreContext db, Video v,string sub, User? user) {
             var entity = new VideoWatched
             {
                 VId = v.VId,
@@ -49,10 +53,11 @@ namespace DataLayer.QueryObjects
                 Channel = v.Channel,
             };
             await db.VideosWatched.AddAsync(entity);
+            await db.AddWatchedEntityToUserHistoryAsync(user,entity,sub);
             await db.SaveChangesAsync();
         }
 
-        public static async Task AddResultToWatchedEntityAsync(this EfCoreContext db, SearchResultedVideo v)
+        public static async Task AddResultToWatchedEntityAsync(this EfCoreContext db, SearchResultedVideo v,string sub, User? user)
         {
             var entity = new VideoWatched
             {
@@ -70,6 +75,7 @@ namespace DataLayer.QueryObjects
                 Channel = v.Channel,
             };
             await db.VideosWatched.AddAsync(entity);
+            await db.AddWatchedEntityToUserHistoryAsync(user, entity,sub);
             await db.SaveChangesAsync();
         }
     }

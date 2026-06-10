@@ -5,19 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using DataLayer.EfClasses;
 using DataLayer.EfCode;
+using Microsoft.EntityFrameworkCore;
 using static Shared.DataTypes;
 
 namespace DataLayer.QueryObjects
 {
     public static class ChangeSearchResultedVideos
     {
-        public static async Task AddResultsToEntityAsync(this EfCoreContext db, VideoDataFromApi[] videos, IQueryable<Channel> channels, SearchKey searchKeyEntity)
+        public static async Task AddResultsToEntityAsync(this EfCoreContext db, VideoDataFromApi[] videos, IQueryable<Channel> channels, SearchKey searchKeyEntity, string listEtag,string? token)
         {
             var hashMap = new Dictionary<string, Channel>();
             foreach (var c in channels)
             {
                 hashMap[c.ChId] = c;
             }
+            var defaultChannel = await db.Channels.SingleOrDefaultAsync(c => c.ChannelId == 1);
             var entities = videos.Select(v => new SearchResultedVideo
             {
                 VId = v.Id,
@@ -31,9 +33,9 @@ namespace DataLayer.QueryObjects
                 Statistics = v.Statistics,
                 LiveStreamingDetails = v.LiveStreamingDetails ?? [],
                 Etag = v.Etag,
-                ListEtag = searchKeyEntity.VideoListEtag,
-                NextToken = searchKeyEntity.NextToken,
-                Channel = hashMap[v.Snippet.ChannelId],
+                ListEtag = listEtag,
+                NextToken = token,
+                Channel = hashMap.TryGetValue(v.Snippet.ChannelId, out var value) ? value : defaultChannel!,
                 SearchKey = searchKeyEntity,
             });
 

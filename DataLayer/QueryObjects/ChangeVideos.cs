@@ -20,6 +20,7 @@ namespace DataLayer.QueryObjects
             {
                 hashMap[c.ChId] = c;
             }
+            var defaultChannel = await db.Channels.SingleOrDefaultAsync(c => c.ChannelId == 1);
             var entities = videos.Select(v => new Video
             {
                 VId = v.Id,
@@ -35,7 +36,7 @@ namespace DataLayer.QueryObjects
                 Etag = v.Etag,
                 ListEtag = listEtag,
                 NextToken = token,
-                Channel = hashMap[v.Snippet.ChannelId] ?? new(),
+                Channel = hashMap.TryGetValue(v.Snippet.ChannelId, out var value) ? value: defaultChannel!,
                 VideoCategory = videoCategory,
             });
 
