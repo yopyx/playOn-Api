@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using DataLayer.EfCode;
 using DataLayer.QueryObjects;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using playOn.Contracts;
@@ -12,18 +13,22 @@ namespace playOn.Endpoints
 {
     public static class LiveChatEndpoints
     {
-        public static void MapLiveChatEndpoints(this WebApplication app)
+        public static void MapLiveChatEndpoints(this RouteGroupBuilder app)
         {
-            app.MapGet("/liveChat", async (IHttpClientFactory factory, IConfiguration configuration, EfCoreContext db, string videoId, string pageNum) =>
+            app.MapGet("/liveChat", [Authorize(policy: "ApiUser")] async (IHttpClientFactory factory, IConfiguration configuration, EfCoreContext db, string videoId, string pageNum) =>
             {
 
                 //Database Query
                 var watchedEntity = await db.VideosWatched.SingleOrDefaultAsync(v => v.VId == videoId);
-                if(watchedEntity is null || watchedEntity?.LiveStreamingDetails?["activeLiveChatId"] is null)
+                if(watchedEntity is null || watchedEntity?.LiveStreamingDetails["activeLiveChatId"] is null)
                 {
-                    return Results.Problem(statusCode: 404);
+                    return Results.Problem(
+                        title: "Not Found",
+                        detail: "The livechat is not found",
+                        statusCode: 404
+                    );
                 }
-                var commentQuery = db.LiveComments.Where(c => c.VideoWatched.VId == videoId &&
+                var commentQuery = db.LiveComments.AsNoTracking().Where(c => c.VideoWatched.VId == videoId &&
                 c.PageNo == pageNum).OrderBy(c => c.LiveChatCommentId);
                 //var commentListTokens = await commentQuery.Select(c => c.NextToken).Distinct().ToArrayAsync();
                 var nextToken = commentQuery.Any()? commentQuery.First().NextToken :null;
@@ -41,9 +46,21 @@ namespace playOn.Endpoints
                 var response = await client.GetAsync($"liveChat/messages?liveChatId={chatId}{(nextToken != null ? "&pageToken=" + nextToken : "")}&part=snippet%2CauthorDetails&key={apiKey}");
                 if (!response.IsSuccessStatusCode)
                 {
-                    return Results.Problem($"API call failed: {response.StatusCode}");
+                    return Results.Problem(
+                        title: "Not Found",
+                        detail: "The livechat is not found",
+                        statusCode: 404
+                    );
                 }
                 var json = await response.Content.ReadFromJsonAsync<LiveChat>();
+                if (json?.Items is null || json.Items.Length == 0)
+                {
+                    return Results.Problem(
+                        title: "Not Found",
+                        detail: "The livechat is not found",
+                        statusCode: 404
+                    );
+                }
 
                 //Database Update
                 if (json!.Items.Length > 0) {

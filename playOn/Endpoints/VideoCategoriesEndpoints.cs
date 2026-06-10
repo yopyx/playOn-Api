@@ -1,5 +1,6 @@
 ﻿using DataLayer.EfCode;
 using DataLayer.QueryObjects;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using playOn.Contracts;
@@ -11,15 +12,15 @@ namespace playOn.Endpoints
 {
     public static class VideoCategoriesEndpoints
     {
-        public static void MapVideoCategoriesEndpoints(this WebApplication app)
+        public static void MapVideoCategoriesEndpoints(this RouteGroupBuilder app)
         {
-            app.MapGet("/video_categories", async (IHttpClientFactory factory, IConfiguration configuration, EfCoreContext db) => {
+            app.MapGet("/video_categories", [Authorize(policy: "ApiUser")] async (IHttpClientFactory factory, IConfiguration configuration, EfCoreContext db) => {
                 
                 //Database Query
                 var count = await db.VideoCategories.CountAsync();
                 if (count > 1)
                 {
-                    return TypedResults.Ok(db.VideoCategories.MapCategoryEntityToDto());
+                    return TypedResults.Ok(db.VideoCategories.AsNoTracking().MapCategoryEntityToDto());
                 }
 
                 //API Call
@@ -28,7 +29,11 @@ namespace playOn.Endpoints
                 var response = await client.GetAsync($"videoCategories?part=snippet&regionCode=US&key={apiKey}");
 
                 if (!response.IsSuccessStatusCode) { //API Call Fail Check
-                    return Results.Problem($"API call failed: {response.StatusCode}");
+                    return Results.Problem(
+                        title: "Not Found",
+                        detail: "The categories are not found",
+                        statusCode: StatusCodes.Status404NotFound
+                    );
                 }
 
                 var json = await response.Content.ReadFromJsonAsync<VideoCategories>();
