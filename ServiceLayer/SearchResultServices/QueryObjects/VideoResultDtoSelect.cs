@@ -12,7 +12,9 @@ namespace ServiceLayer.SearchResultServices.QueryObjects
     {
         public static IQueryable<VideoCardDto> MapVideoResultEntityToDto(this IQueryable<SearchResultedVideo> videoResults)
         {
-            return videoResults.Select(v => new VideoCardDto
+            return videoResults
+                .Where(v => v.Channel.Title != "-unknown_Channel-")
+                    .Select(v => new VideoCardDto
             {
                 VideoId = v.VId,
                 ChannelId = v.Channel.ChId,
