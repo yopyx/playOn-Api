@@ -78,5 +78,7 @@ namespace DataLayer.EfCode
         public DbSet<VideoWatched> VideosWatched { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<LiveChatComment> LiveComments { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<History_VideoWatched> VideosHistory { get; set; }
     }
 }
