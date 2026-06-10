@@ -14,5 +14,6 @@ namespace DataLayer.EfClasses
         //Relationships
         public ICollection<Video> Videos { get; set; } = [];
         public ICollection<SearchResultedVideo> SearchResultedVideos { get; set; } = [];
+        public ICollection<VideoWatched> VideosWatched { get; set; } = [];
     }
 }

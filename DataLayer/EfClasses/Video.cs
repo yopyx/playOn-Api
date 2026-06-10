@@ -19,7 +19,7 @@ namespace DataLayer.EfClasses
         public string ListEtag { get; set; } = string.Empty;
         public string? NextToken { get; set; }
 
-
+        
         //Relationships
         public int ChannelId { get; set; }
         public Channel Channel { get; set; } = null!;  // navigation property
