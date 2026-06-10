@@ -19,570 +19,570 @@ namespace DataLayer.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.22")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("DataLayer.EfClasses.Channel", b =>
-                {
-                    b.Property<int>("ChannelId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("ChannelId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChannelId"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChannelId"));
 
-                    b.Property<string>("ChId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("ChId")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Statistics")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Statistics")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Thumbnails")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Thumbnails")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("ChannelId");
+                b.HasKey("ChannelId");
 
-                    b.ToTable("Channels");
-                });
+                b.ToTable("Channels");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.Comment", b =>
-                {
-                    b.Property<int>("CommentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("CommentId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
 
-                    b.Property<string>("AuthorDisplayName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("AuthorDisplayName")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("AuthorProfileImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("AuthorProfileImageUrl")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("CId")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("LikeCount")
-                        .HasColumnType("int");
+                b.Property<int>("LikeCount")
+                    .HasColumnType("int");
 
-                    b.Property<string>("ListEtag")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("ListEtag")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("NextToken")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("NextToken")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PublishedAt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("PublishedAt")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TextOriginal")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("TextOriginal")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TotalReplyCount")
-                        .HasColumnType("int");
+                b.Property<int>("TotalReplyCount")
+                    .HasColumnType("int");
 
-                    b.Property<int>("VideoWatchedId")
-                        .HasColumnType("int");
+                b.Property<int>("VideoWatchedId")
+                    .HasColumnType("int");
 
-                    b.HasKey("CommentId");
+                b.HasKey("CommentId");
 
-                    b.HasIndex("VideoWatchedId");
+                b.HasIndex("VideoWatchedId");
 
-                    b.ToTable("Comments");
-                });
+                b.ToTable("Comments");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.LiveChatComment", b =>
-                {
-                    b.Property<int>("LiveChatCommentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("LiveChatCommentId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LiveChatCommentId"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LiveChatCommentId"));
 
-                    b.Property<string>("CId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("CId")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DisplayMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("DisplayMessage")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("DisplayName")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ListEtag")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("ListEtag")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("NextToken")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("NextToken")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ProfileImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("ProfileImageUrl")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PublishedAt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("PublishedAt")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("VideoWatchedId")
-                        .HasColumnType("int");
+                b.Property<int>("VideoWatchedId")
+                    .HasColumnType("int");
 
-                    b.HasKey("LiveChatCommentId");
+                b.HasKey("LiveChatCommentId");
 
-                    b.HasIndex("VideoWatchedId");
+                b.HasIndex("VideoWatchedId");
 
-                    b.ToTable("LiveComments");
-                });
+                b.ToTable("LiveComments");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.NestedComment", b =>
-                {
-                    b.Property<int>("NestedCommentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("NestedCommentId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NestedCommentId"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NestedCommentId"));
 
-                    b.Property<string>("AuthorDisplayName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("AuthorDisplayName")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("AuthorProfileImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("AuthorProfileImageUrl")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("CId")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CommentId")
-                        .HasColumnType("int");
+                b.Property<int>("CommentId")
+                    .HasColumnType("int");
 
-                    b.Property<int>("LikeCount")
-                        .HasColumnType("int");
+                b.Property<int>("LikeCount")
+                    .HasColumnType("int");
 
-                    b.Property<string>("ParentId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("ParentId")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PublishedAt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("PublishedAt")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TextOriginal")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("TextOriginal")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("NestedCommentId");
+                b.HasKey("NestedCommentId");
 
-                    b.HasIndex("CommentId");
+                b.HasIndex("CommentId");
 
-                    b.ToTable("NestedComment");
-                });
+                b.ToTable("NestedComment");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.SearchKey", b =>
-                {
-                    b.Property<int>("SearchKeyId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("SearchKeyId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SearchKeyId"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SearchKeyId"));
 
-                    b.Property<string>("NextToken")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("NextToken")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("VideoListEtag")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("VideoListEtag")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("SearchKeyId");
+                b.HasKey("SearchKeyId");
 
-                    b.ToTable("SearchKeys");
-                });
+                b.ToTable("SearchKeys");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.SearchResultedVideo", b =>
-                {
-                    b.Property<int>("SearchResultedVideoId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("SearchResultedVideoId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SearchResultedVideoId"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SearchResultedVideoId"));
 
-                    b.Property<int>("ChannelId")
-                        .HasColumnType("int");
+                b.Property<int>("ChannelId")
+                    .HasColumnType("int");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Description")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Duration")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Duration")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Etag")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Etag")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ListEtag")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("ListEtag")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LiveBroadcastContent")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("LiveBroadcastContent")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LiveStreamingDetails")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("LiveStreamingDetails")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("NextToken")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("NextToken")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PublishedAt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("PublishedAt")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SearchKeyId")
-                        .HasColumnType("int");
+                b.Property<int>("SearchKeyId")
+                    .HasColumnType("int");
 
-                    b.Property<string>("Statistics")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Statistics")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Tags")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Tags")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Thumbnails")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Thumbnails")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("VId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("VId")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("SearchResultedVideoId");
+                b.HasKey("SearchResultedVideoId");
 
-                    b.HasIndex("ChannelId");
+                b.HasIndex("ChannelId");
 
-                    b.HasIndex("SearchKeyId");
+                b.HasIndex("SearchKeyId");
 
-                    b.ToTable("VideoResults");
-                });
+                b.ToTable("VideoResults");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.SearchSuggestions", b =>
-                {
-                    b.Property<int>("SearchSuggestionsId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("SearchSuggestionsId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SearchSuggestionsId"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SearchSuggestionsId"));
 
-                    b.Property<string>("Suggestions")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Suggestions")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("SearchSuggestionsId");
+                b.HasKey("SearchSuggestionsId");
 
-                    b.ToTable("SearchSuggestions");
-                });
+                b.ToTable("SearchSuggestions");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.Video", b =>
-                {
-                    b.Property<int>("VideoId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("VideoId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VideoId"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VideoId"));
 
-                    b.Property<int>("ChannelId")
-                        .HasColumnType("int");
+                b.Property<int>("ChannelId")
+                    .HasColumnType("int");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Description")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Duration")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Duration")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Etag")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Etag")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ListEtag")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("ListEtag")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LiveBroadcastContent")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("LiveBroadcastContent")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LiveStreamingDetails")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("LiveStreamingDetails")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("NextToken")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("NextToken")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PublishedAt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("PublishedAt")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Statistics")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Statistics")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Tags")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Tags")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Thumbnails")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Thumbnails")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("VId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("VId")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("VideoCategoryId")
-                        .HasColumnType("int");
+                b.Property<int>("VideoCategoryId")
+                    .HasColumnType("int");
 
-                    b.HasKey("VideoId");
+                b.HasKey("VideoId");
 
-                    b.HasIndex("ChannelId");
+                b.HasIndex("ChannelId");
 
-                    b.HasIndex("VideoCategoryId");
+                b.HasIndex("VideoCategoryId");
 
-                    b.ToTable("Videos");
-                });
+                b.ToTable("Videos");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.VideoCategory", b =>
-                {
-                    b.Property<int>("VideoCategoryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("VideoCategoryId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VideoCategoryId"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VideoCategoryId"));
 
-                    b.Property<string>("Etag")
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Etag")
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("VCId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("VCId")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("VideoCategoryId");
+                b.HasKey("VideoCategoryId");
 
-                    b.ToTable("VideoCategories");
-                });
+                b.ToTable("VideoCategories");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.VideoWatched", b =>
-                {
-                    b.Property<int>("VideoWatchedId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("VideoWatchedId")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VideoWatchedId"));
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VideoWatchedId"));
 
-                    b.Property<int>("ChannelId")
-                        .HasColumnType("int");
+                b.Property<int>("ChannelId")
+                    .HasColumnType("int");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Description")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Duration")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Duration")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Etag")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Etag")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LiveBroadcastContent")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("LiveBroadcastContent")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LiveStreamingDetails")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("LiveStreamingDetails")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PublishedAt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("PublishedAt")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Statistics")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Statistics")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Tags")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Tags")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Thumbnails")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Thumbnails")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("VId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                b.Property<string>("VId")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("VideoWatchedId");
+                b.HasKey("VideoWatchedId");
 
-                    b.HasIndex("ChannelId");
+                b.HasIndex("ChannelId");
 
-                    b.ToTable("VideosWatched");
-                });
+                b.ToTable("VideosWatched");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.Comment", b =>
-                {
-                    b.HasOne("DataLayer.EfClasses.VideoWatched", "VideoWatched")
-                        .WithMany("Comments")
-                        .HasForeignKey("VideoWatchedId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("DataLayer.EfClasses.VideoWatched", "VideoWatched")
+                    .WithMany("Comments")
+                    .HasForeignKey("VideoWatchedId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("VideoWatched");
-                });
+                b.Navigation("VideoWatched");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.LiveChatComment", b =>
-                {
-                    b.HasOne("DataLayer.EfClasses.VideoWatched", "VideoWatched")
-                        .WithMany("LiveChatComments")
-                        .HasForeignKey("VideoWatchedId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("DataLayer.EfClasses.VideoWatched", "VideoWatched")
+                    .WithMany("LiveChatComments")
+                    .HasForeignKey("VideoWatchedId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("VideoWatched");
-                });
+                b.Navigation("VideoWatched");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.NestedComment", b =>
-                {
-                    b.HasOne("DataLayer.EfClasses.Comment", "Comment")
-                        .WithMany("NestedComments")
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("DataLayer.EfClasses.Comment", "Comment")
+                    .WithMany("NestedComments")
+                    .HasForeignKey("CommentId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Comment");
-                });
+                b.Navigation("Comment");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.SearchResultedVideo", b =>
-                {
-                    b.HasOne("DataLayer.EfClasses.Channel", "Channel")
-                        .WithMany("SearchResultedVideos")
-                        .HasForeignKey("ChannelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("DataLayer.EfClasses.Channel", "Channel")
+                    .WithMany("SearchResultedVideos")
+                    .HasForeignKey("ChannelId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("DataLayer.EfClasses.SearchKey", "SearchKey")
-                        .WithMany("Videos")
-                        .HasForeignKey("SearchKeyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("DataLayer.EfClasses.SearchKey", "SearchKey")
+                    .WithMany("Videos")
+                    .HasForeignKey("SearchKeyId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Channel");
+                b.Navigation("Channel");
 
-                    b.Navigation("SearchKey");
-                });
+                b.Navigation("SearchKey");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.Video", b =>
-                {
-                    b.HasOne("DataLayer.EfClasses.Channel", "Channel")
-                        .WithMany("Videos")
-                        .HasForeignKey("ChannelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("DataLayer.EfClasses.Channel", "Channel")
+                    .WithMany("Videos")
+                    .HasForeignKey("ChannelId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("DataLayer.EfClasses.VideoCategory", "VideoCategory")
-                        .WithMany("Videos")
-                        .HasForeignKey("VideoCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                b.HasOne("DataLayer.EfClasses.VideoCategory", "VideoCategory")
+                    .WithMany("Videos")
+                    .HasForeignKey("VideoCategoryId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Channel");
+                b.Navigation("Channel");
 
-                    b.Navigation("VideoCategory");
-                });
+                b.Navigation("VideoCategory");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.VideoWatched", b =>
-                {
-                    b.HasOne("DataLayer.EfClasses.Channel", "Channel")
-                        .WithMany()
-                        .HasForeignKey("ChannelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("DataLayer.EfClasses.Channel", "Channel")
+                    .WithMany()
+                    .HasForeignKey("ChannelId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.Navigation("Channel");
-                });
+                b.Navigation("Channel");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.Channel", b =>
-                {
-                    b.Navigation("SearchResultedVideos");
+            {
+                b.Navigation("SearchResultedVideos");
 
-                    b.Navigation("Videos");
-                });
+                b.Navigation("Videos");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.Comment", b =>
-                {
-                    b.Navigation("NestedComments");
-                });
+            {
+                b.Navigation("NestedComments");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.SearchKey", b =>
-                {
-                    b.Navigation("Videos");
-                });
+            {
+                b.Navigation("Videos");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.VideoCategory", b =>
-                {
-                    b.Navigation("Videos");
-                });
+            {
+                b.Navigation("Videos");
+            });
 
             modelBuilder.Entity("DataLayer.EfClasses.VideoWatched", b =>
-                {
-                    b.Navigation("Comments");
+            {
+                b.Navigation("Comments");
 
-                    b.Navigation("LiveChatComments");
-                });
+                b.Navigation("LiveChatComments");
+            });
 #pragma warning restore 612, 618
         }
     }
