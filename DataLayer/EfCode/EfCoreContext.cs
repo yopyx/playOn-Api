@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 using DataLayer.EfClasses;
 using DataLayer.Extensions;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 namespace DataLayer.EfCode
 {
-    public class EfCoreContext(DbContextOptions<EfCoreContext> options) : DbContext(options)
+    public class EfCoreContext(DbContextOptions<EfCoreContext> options) : DbContext(options), IDataProtectionKeyContext
     {
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -80,5 +80,7 @@ namespace DataLayer.EfCode
         public DbSet<LiveChatComment> LiveComments { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<History_VideoWatched> VideosHistory { get; set; }
+
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
     }
 }
