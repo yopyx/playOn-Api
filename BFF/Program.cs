@@ -139,10 +139,11 @@ builder.Services.AddAuthentication(options =>
                 ? seconds : 3600;
 
             await tokenStore.SaveAsync(sessionId, new TokenData(
-                AccessToken:context.TokenEndpointResponse.AccessToken, 
-                RefreshToken:context.TokenEndpointResponse.RefreshToken,
-                IdToken:context.TokenEndpointResponse.IdToken,
-                ExpiresAt:DateTimeOffset.UtcNow.AddSeconds(expiresIn)));
+                AccessToken: context.TokenEndpointResponse.AccessToken,
+                RefreshToken: context.TokenEndpointResponse.RefreshToken,
+                IdToken: context.TokenEndpointResponse.IdToken,
+                ExpiresAt: DateTimeOffset.UtcNow.AddSeconds(expiresIn),
+                LastIntrospectedAt: DateTimeOffset.UtcNow));
         },
 
         OnRedirectToIdentityProviderForSignOut = async context =>
@@ -188,6 +189,10 @@ builder.Services.AddHttpClient("ApiClient", client =>
     client.BaseAddress = new Uri(@"https://localhost:7287/api/");
 });
 
+builder.Services.AddHttpClient("KeycloakClient", client =>
+{
+    client.BaseAddress = new Uri(@$"{builder.Configuration["OIDC:Authority"]}/protocol/openid-connect");
+});
 
 builder.Services.AddCors(options =>
 {
@@ -255,8 +260,6 @@ app.MapGet("/is_authenticated", (HttpContext ctx) =>
 
 // Redirect APIs
 app.MapLandingPagesEndpoints();
-
-app.MapIntrospectEndpoint();
 
 app.MapProtectedResourcesEndpoints();
 
