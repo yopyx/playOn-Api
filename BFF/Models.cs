@@ -102,8 +102,9 @@ namespace BFF
             //private async Task<string?> RefreshAsync() in case we return just access token
             private async Task<string?> RefreshAsync(string sessionId, string refreshToken, CancellationToken ct)
             {
-                var client = _httpClientFactory.CreateClient("KeycloakClient");
-                var response = await client.PostAsync("/token", 
+                //var client = _httpClientFactory.CreateClient("KeycloakClient");
+                var client = _httpClientFactory.CreateClient();
+                var response = await client.PostAsync("http://localhost:8080/realms/myrealm/protocol/openid-connect/token", 
                     new FormUrlEncodedContent(new Dictionary<string, string>
                         {
                             ["grant_type"] = "refresh_token",
@@ -116,6 +117,7 @@ namespace BFF
                 if (!response.IsSuccessStatusCode) {
                     _logger.LogWarning("Failed to refresh token for session {SessionId}", sessionId);
                     await _tokenStore.RemoveAsync(sessionId, ct);
+                    _sessionLocks.TryRemove(sessionId, out _); // session is dead, drop the lock
                     return null; // Caller should sign out
                 }
 
@@ -133,8 +135,9 @@ namespace BFF
             }
 
             private async Task<string?> IntrospectAsync(string sessionId, TokenData tokenData, CancellationToken ct) {
-                var client = _httpClientFactory.CreateClient("KeycloakClient");
-                var response = await client.PostAsync("/token/introspect",
+                //var client = _httpClientFactory.CreateClient("KeycloakClient");
+                var client = _httpClientFactory.CreateClient();
+                var response = await client.PostAsync("http://localhost:8080/realms/myrealm/protocol/openid-connect/token/introspect",
                     new FormUrlEncodedContent(new Dictionary<string, string>
                     {
                         ["client_id"] = _config["OIDC:ClientId"]!,
@@ -163,6 +166,7 @@ namespace BFF
                         sessionId);
 
                     await _tokenStore.RemoveAsync(sessionId, ct);
+                    _sessionLocks.TryRemove(sessionId, out _); // session is dead, drop the lock
                     return null; // triggers 401 + SignOut in middleware
 
                 }
@@ -198,15 +202,28 @@ namespace BFF
                         return await IntrospectAsync(sessionId, tokenData, ct);
                         //return accessToken;
                     }
-                    return tokenData.AccessToken; // Shouldn't reach here
+
+                    // Token was refreshed by a concurrent request while this one waited on the semaphore
+                    return tokenData.AccessToken;
                 }
                 finally
                 {
                     semaphore.Release();
-                    if(semaphore.CurrentCount == 1) // No one is waiting, clean up
-                    {
-                        _sessionLocks.TryRemove(sessionId, out _);
-                    }
+                    //if(semaphore.CurrentCount == 1) // No one is waiting, clean up
+                    //{
+                        //_sessionLocks.TryRemove(sessionId, out _);
+                        //The check CurrentCount == 1 means "no one is waiting right now",
+                        //but there's a window between Release() and the if check where
+                        //another thread can call GetOrAdd and grab a reference to the same semaphore object.
+                        //Then you remove it from the dictionary — but that other thread
+                        //is still holding a reference and will WaitAsync on a semaphore that's now orphaned
+                        //and will never be cleaned up. Worse, a third thread will then create a new semaphore
+                        //for the same session, breaking the mutual exclusion guarantee entirely.
+
+                        //Using the KeyValuePair overload of TryRemove is atomic — it only removes the entry if
+                        //the key still maps to this exact semaphore instance, preventing the orphan scenario.
+                        //_sessionLocks.TryRemove(new KeyValuePair<string, SemaphoreSlim>(sessionId, semaphore));
+                    //}
                 }
             }
         }
