@@ -1,12 +1,12 @@
-using System;
+using System.Security.Claims;
 using BFF;
 using BFF.AuthEndpoints;
 using DataLayer.EfCode;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Microsoft.IdentityModel.Tokens;
 using static BFF.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,10 +15,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//Register the EF Core context for Data Protection key storage
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<EfCoreContext>(options =>
+    options.UseSqlServer(connectionString)
+);
+
 // Install: dotnet add package Microsoft.AspNetCore.DataProtection.EntityFrameworkCore
 builder.Services.AddDataProtection()
     .PersistKeysToDbContext<EfCoreContext>() // keys stored in SQL Server
-    .SetApplicationName("playOn");      // must match across restarts
+    .SetApplicationName("playOn-bff");      // must match across restarts
 
 builder.Services.AddDistributedMemoryCache();
 //builder.Services.AddStackExchangeRedisCache(options =>
@@ -67,7 +73,7 @@ builder.Services.AddAuthentication(options =>
         OnRedirectToLogin = context =>
         {
             // Prevent redirect loops in API calls
-            //context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             return Task.CompletedTask;
         }
     };
@@ -157,6 +163,21 @@ builder.Services.AddAuthentication(options =>
 
             // Clean up tokens on logout
             await tokenStore.RemoveAsync(sessionId);
+        },
+
+        OnTokenValidated = context => {
+            var identity = context.Principal?.Identity as ClaimsIdentity;
+            // (ClaimTypes.Name) can replace (c => c.Type == "preferred_username") arrow function.
+            var username = context.Principal?.FindFirst(c => c.Type == "preferred_username")?.Value;
+            if(!string.IsNullOrEmpty(username))
+            {
+                // Add the preferred_username claim to the identity
+                // "preferred_username" == ClaimTypes.Name that was configured in TokenValidationParameters.NameClaimType
+                // but it is better to use the original claim type for clarity and maintainability.
+                identity?.AddClaim(new Claim(ClaimTypes.Name, username ?? ""));
+            }
+            return Task.CompletedTask;
+            // Now I can retrieve the username using context.User.Identity.Name / HttpContext.User in my application code.
         }
 
         //OnTokenValidated = context =>
@@ -208,6 +229,20 @@ builder.Services.AddScoped<ITokenRefreshService, KeycloakTokenRefreshService>();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<EfCoreContext>();
+        db.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        // log critical failure
+        Console.WriteLine("Migration failed: " + ex.Message);
+        throw; // optional
+    }
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -241,8 +276,8 @@ app.UseCors("ClientOnly");
 app.UseSession();
 app.UseRouting();
 app.UseAuthentication();
-app.UseAuthorization();
 app.UseMiddleware<TokenRefreshMiddleware>();
+app.UseAuthorization();
 
 // Auth APIs
 app.MapSignInEndpoints();
