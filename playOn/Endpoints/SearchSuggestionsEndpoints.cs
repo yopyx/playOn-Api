@@ -45,9 +45,17 @@ namespace playOn.Endpoints
                 }
                 JsonElement json = await response.Content.ReadFromJsonAsync<JsonElement>();
                 var list = json[1].EnumerateArray().Select(x => x.GetString()).ToArray();
+                
                 //Database Update
-                if (list!=null && list.Length > 0) { 
-                    await db.AddSuggestionsToEntityAsync(q, list!);
+                if (list != null && list.Length > 0)
+                {
+                    try {
+                        await db.AddSuggestionsToEntityAsync(q, list!);
+                    }
+                    catch (DbUpdateException) // unique constraint violation
+                    {
+                        db.ChangeTracker.Clear();
+                    }
                 }
 
                 return TypedResults.Ok(list ?? []);

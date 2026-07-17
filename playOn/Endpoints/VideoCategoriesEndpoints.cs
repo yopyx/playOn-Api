@@ -45,7 +45,14 @@ namespace playOn.Endpoints
                 var filteredItems = json!.Items.Where(item => item.Snippet.Assignable == true).ToList();
 
                 //Database Update
-                await db.AddCategoriesToEntity(filteredItems);
+                try
+                {
+                    await db.AddCategoriesToEntity(filteredItems);
+                }
+                catch (DbUpdateException) // unique constraint violation
+                {
+                    db.ChangeTracker.Clear();
+                }
 
                 //Mapping filteredItems to Dto
                 var categories = db.VideoCategories.MapCategoryEntityToDto();

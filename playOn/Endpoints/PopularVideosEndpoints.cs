@@ -20,7 +20,6 @@ namespace playOn.Endpoints
                 var videoQuery = db.Videos.Where(v => v.VideoCategory.VCId==VideoCategoryId);
                 var count = await videoQuery.CountAsync();
                 //var category = await db.VideoCategories.Include(v => v.Videos).SingleOrDefaultAsync(c => c.VCId == VideoCategoryId);
-                var tokens = videoQuery.AsNoTracking().OrderBy(v => v.VideoId).Select(v => v.NextToken).Distinct().ToArray();
                 var page = Convert.ToInt16(pageNum);
                 if (count >= page * 12) {
                     var videoEntities = videoQuery
@@ -28,13 +27,15 @@ namespace playOn.Endpoints
                         .OrderBy(v => v.VideoId)
                         .Skip((page - 1) * 12)
                         .Take(12)
-                        .Include(v => v.Channel)
-                        .MapVideoEntityToDto();
-                    return TypedResults.Ok(new VideoCardListDto { VideoCardList = videoEntities, QueryNextPage = tokens[page - 1] != null });
+                        .Include(v => v.Channel);
+                    var videoDtos = videoEntities.MapVideoEntityToDto();
+                    var entity = await videoEntities.FirstOrDefaultAsync();
+                    return TypedResults.Ok(new VideoCardListDto { VideoCardList = videoDtos, QueryNextPage = entity?.NextToken != null });
                 }
 
                 //API Call
-                var nextToken = page > 1 ? tokens[^1] : null;
+                var lastEntity = await videoQuery.OrderByDescending(v => v.VideoId).FirstOrDefaultAsync();
+                var nextToken = count > 0 ? lastEntity?.NextToken : null;
                 var apiKey = configuration["YouTube:ApiKey"];
                 var client = factory.CreateClient("YouTubeClient");
                 var response = await client.GetAsync($"videos?part=snippet%2CcontentDetails%2Cstatistics&chart=mostPopular&maxResults=12{(nextToken != null ? "&pageToken=" + nextToken : "")}&regionCode=US&videoCategoryId={VideoCategoryId}&key={apiKey}");
@@ -69,7 +70,13 @@ namespace playOn.Endpoints
                 //Update Database
                 if (json.Items.Length > 0)
                 {
-                    await db.AddVideosToEntityAsync(json.Items, category!, channels, json.Etag, json?.NextPageToken);
+                    try {
+                        await db.AddVideosToEntityAsync(json.Items, category!, channels, json.Etag, json?.NextPageToken);
+                    }
+                    catch (DbUpdateException)
+                    {
+                        db.ChangeTracker.Clear();
+                    }
                 }
 
                 var videoCardsToDto = channels.MapVideoCardToDto(db,json!.Items, json.Etag);

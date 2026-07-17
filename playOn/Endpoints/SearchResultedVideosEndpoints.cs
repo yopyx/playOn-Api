@@ -23,21 +23,27 @@ namespace playOn.Endpoints
                 //Database Query
                 q = q.Trim().ToLower();
                 var keyEntity = await db.SearchKeys.SingleOrDefaultAsync(k => k.Title==q);
-                var videoQuery = db.VideoResults.Where(v => v.SearchKey.Title == q).OrderBy(v => v.SearchResultedVideoId);
-                var tokens = videoQuery.Select(v => v.NextToken).Distinct().ToArray();
+                var videoQuery = db.VideoResults.Where(v => v.SearchKey.Title == q);
+                var count = await videoQuery.CountAsync();
                 var page = Convert.ToInt16(pageNum);
-                if (keyEntity != null && tokens.Length >= page)
+                if (keyEntity != null && count >= page * 25)
                 {
                     var videoEntities = videoQuery
+                        .AsNoTracking()
+                        .OrderBy(v => v.SearchResultedVideoId)
                         .Skip((page - 1) * 25)
                         .Take(25)
-                        .MapVideoResultEntityToDto();
-                    return TypedResults.Ok(new VideoCardListDto { VideoCardList = videoEntities, QueryNextPage = tokens[page - 1] != null });
+                        .Include(v => v.Channel);
+
+                    var videoDtos = videoEntities.MapVideoResultEntityToDto();
+                    var entry = await videoEntities.FirstOrDefaultAsync();
+                    return TypedResults.Ok(new VideoCardListDto { VideoCardList = videoDtos, QueryNextPage = entry?.NextToken != null });
                
                 }
 
                 //API Call for fetching videos ids
-                var nextToken = tokens.Length>0?tokens[^1] :null;
+                var lastEntity = await videoQuery.OrderByDescending(v => v.SearchResultedVideoId).FirstOrDefaultAsync();
+                var nextToken = count > 0 ? lastEntity?.NextToken : null;
                 var apiKey = configuration["YouTube:ApiKey"];
                 var client = factory.CreateClient("YouTubeClient");
                 var response = await client.GetAsync($"search?part=snippet&maxResults=25{(nextToken != null ? "&pageToken=" + nextToken : "")}&q={q}&key={apiKey}");

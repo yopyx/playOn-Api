@@ -31,7 +31,14 @@ namespace playOn.Endpoints
                 var videoWatched = await db.VideosWatched.Include(v => v.Channel).SingleOrDefaultAsync(v => v.VId == videoId);
                 if (videoWatched != null)
                 {
-                    await db.AddWatchedEntityToUserHistoryAsync(user, videoWatched, sub!);
+                    try
+                    {
+                        await db.AddWatchedEntityToUserHistoryAsync(user, videoWatched, sub!);
+                    }
+                    catch (DbUpdateException) // unique constraint violation
+                    {
+                        db.ChangeTracker.Clear();
+                    }
                     return TypedResults.Ok(videoWatched.MapOneWatchedEntityToDto(null));
                 }
 
@@ -39,16 +46,28 @@ namespace playOn.Endpoints
                 if (video != null)
                 {
                     //Add video to VideoWatched table
-                    await db.AddVideoToWatchedEntityAsync(video,sub!,user);
-
+                    try
+                    {
+                        await db.AddVideoToWatchedEntityAsync(video, sub!, user);
+                    }
+                    catch (DbUpdateException)
+                    {
+                        db.ChangeTracker.Clear();
+                    }
                     return TypedResults.Ok(video.MapOneVideoEntityToDto());
                 }
                 var searchResult = await db.VideoResults.Include(v => v.Channel).FirstOrDefaultAsync(v => v.VId == videoId);
                 if (searchResult != null)
                 {
                     //Add video result to VideoWatched table
-                    await db.AddResultToWatchedEntityAsync(searchResult,sub!,user);
-
+                    try
+                    {
+                        await db.AddResultToWatchedEntityAsync(searchResult, sub!, user);
+                    }
+                    catch (DbUpdateException)
+                    {
+                        db.ChangeTracker.Clear();
+                    }
                     return TypedResults.Ok(searchResult.MapOneResultEntityToDto());
                 }
 
@@ -82,8 +101,14 @@ namespace playOn.Endpoints
                 var channelsList = await helpers.GetChannelsAsync([channelId]);
 
                 //Updating Database
-                await db.AddApiDataToWatchedEntityAsync(channelsList, json.Items[0], sub!,user);
-
+                try
+                {
+                    await db.AddApiDataToWatchedEntityAsync(channelsList, json.Items[0], sub!, user);
+                }
+                catch (DbUpdateException)
+                {
+                    db.ChangeTracker.Clear();
+                }
                 var videoCardsToDto = channelsList.MapVideoCardToDto(db,json.Items, json.Etag).First();
                 return TypedResults.Ok(videoCardsToDto);
             });
