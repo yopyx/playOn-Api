@@ -1,6 +1,7 @@
 ﻿using BFF.AuthEndpoints;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using static System.Net.WebRequestMethods;
 using static BFF.Models;
@@ -8,44 +9,48 @@ using static BFF.Utils;
 
 namespace BFF
 {
-    public class TokenRefreshMiddleware(RequestDelegate next)
+    public class TokenRefreshMiddleware(RequestDelegate next, ILogger<TokenRefreshMiddleware> logger)
     {
         private readonly RequestDelegate _next = next;
+        private readonly ILogger<TokenRefreshMiddleware> _logger = logger;
 
-        public async Task InvokeAsync(HttpContext context, ITokenRefreshService refreshService)
+        public async Task InvokeAsync(HttpContext context, ITokenRefreshService refreshService,IConfiguration configuration)
         {
             // Only apply to authenticated API routes
             if (context.User.Identity?.IsAuthenticated == true &&
-                context.Request.Path.StartsWithSegments("/resources_api")
-                || context.Request.Path.StartsWithSegments("/checkIfLogged"))
+                context.Request.Path.StartsWithSegments("/resources_api"))
             {
                 await context.Session.LoadAsync();
-                var tokenData = await refreshService.GetValidAccessTokenAsync(context);
+                _logger.LogWarning("Session ID: {SessionId}, IsAvailable: {IsAvailable}",
+                    context.Session.Id,
+                    context.Session.IsAvailable);
 
-                if (tokenData is null)
+                var idToken = context.Session.GetString("id_token");
+                _logger.LogWarning("id_token present: {Present}", idToken is not null);
+
+                var accessToken = await refreshService.GetValidAccessTokenAsync(context);
+
+                if (accessToken is null)
                 {
-                    //await SignOut(context, configuration);
-                    //context.Request.Path = "/logout";
+                    // Only sign out if the token store confirms the session is gone
+                    //var sessionStillExists = await refreshService.(sessionId);
+                    //if (!sessionStillExists)
+                    //{
+                    //    await SignOut(context, configuration, idToken);
+                    //    return;
+                    //}
 
-                    var endpoint = context.GetEndpoint();
+                    // Transient failure — return 401, don't nuke the session
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return;
 
-                    if (endpoint?.Metadata.GetMetadata<IRouteNameMetadata>()?.RouteName != "SignOutEndpoint")
-                    {
-                        // Swap to a different endpoint entirely
-                        var endpointDataSource = context.RequestServices
-                            .GetRequiredService<EndpointDataSource>();
-
-                        var newEndpoint = endpointDataSource.Endpoints
-                            .FirstOrDefault(e => e.DisplayName == "SignOutEndpoint");
-
-                        if (newEndpoint is not null)
-                            context.SetEndpoint(newEndpoint); // ← router will now execute this one
-                    }
+                    //await SignOut(context, configuration, idToken);
+                    //return;
                 }
                 else
                 {
                     // Attach token to the request context so downstream handlers can use it
-                    context.Items["access_token"] = tokenData.AccessToken;
+                    context.Items["access_token"] = accessToken;
                 }
             }
 
