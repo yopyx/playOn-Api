@@ -296,6 +296,8 @@ app.MapGet("/is_authenticated", (HttpContext ctx) =>
 // Redirect APIs
 app.MapLandingPagesEndpoints();
 
+app.MapUserEndpoints();
+
 app.MapProtectedResourcesEndpoints();
 
 app.MapGet("/debug/auth", async (HttpContext ctx) =>
