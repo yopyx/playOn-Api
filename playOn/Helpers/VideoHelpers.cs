@@ -24,7 +24,13 @@ namespace playOn.Helpers
 
             //Update Database
             if (list.Items.Length > 0) {
-                await _db.AddResultsToEntityAsync(list.Items, channels, key, list.Etag,token);
+                try { 
+                    await _db.AddResultsToEntityAsync(list.Items, channels, key, list.Etag, token); 
+                }
+                catch (DbUpdateException)
+                {
+                    _db.ChangeTracker.Clear();
+                }
             }
 
             var videoCardsToDto = channels.MapVideoCardToDto(_db,list!.Items, list.Etag);

@@ -54,7 +54,14 @@ namespace playOn.Helpers
 
             //Database Update
             if (json.Items.Length > 0) {
-                await _db.AddChannelsToEntity(json.Items);
+                try
+                {
+                    await _db.AddChannelsToEntity(json.Items);
+                }
+                catch (DbUpdateException)
+                {
+                    _db.ChangeTracker.Clear();
+                }
             }
             
             //Mapping entities to Dto
