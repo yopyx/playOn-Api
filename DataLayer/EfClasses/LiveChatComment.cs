@@ -17,6 +17,7 @@ namespace DataLayer.EfClasses
         public string ListEtag { get; set; } = string.Empty;
         public string PageNo { get; set; } = string.Empty;
         public string? NextToken { get; set; }
+        public int? PollingIntervalMillis { get; set; }
 
 
         //Relationships
