@@ -20,6 +20,7 @@ namespace playOn.Endpoints
 
                 //Database Query
                 var watchedEntity = await db.VideosWatched.SingleOrDefaultAsync(v => v.VId == videoId);
+                
                 if(watchedEntity is null || watchedEntity?.LiveStreamingDetails["activeLiveChatId"] is null)
                 {
                     return Results.Problem(
@@ -28,15 +29,15 @@ namespace playOn.Endpoints
                         statusCode: 404
                     );
                 }
-                var commentQuery = db.LiveComments.AsNoTracking().Where(c => c.VideoWatched.VId == videoId &&
-                c.PageNo == pageNum).OrderBy(c => c.LiveChatCommentId);
-                //var commentListTokens = await commentQuery.Select(c => c.NextToken).Distinct().ToArrayAsync();
-                var nextToken = commentQuery.Any()? commentQuery.First().NextToken :null;
-                if (commentQuery.Any())
+                var commentQuery = db.LiveComments.Where(c => c.VideoWatched.VId == videoId);
+                var lastEntity = await commentQuery.OrderByDescending(c => c.LiveChatCommentId).FirstOrDefaultAsync();
+                var nextToken = lastEntity?.NextToken;
+                if (commentQuery.Any() && pageNum=="1")
                 {
-                    var liveComments = commentQuery.MapLiveCommentEntityToDto();
-                    
-                    return TypedResults.Ok(new LiveCommentListDto { LiveCommentList = liveComments, QueryNextPage = nextToken != null });
+                    var liveCommentDtos = commentQuery.AsNoTracking()
+                        .OrderBy(c => c.LiveChatCommentId).MapLiveCommentEntityToDto();
+
+                    return TypedResults.Ok(new LiveCommentListDto { LiveCommentList = liveCommentDtos, QueryNextPage = nextToken!=null, PollingIntervalMillis= lastEntity?.PollingIntervalMillis });
                 }
 
                 //API Call
@@ -53,7 +54,7 @@ namespace playOn.Endpoints
                     );
                 }
                 var json = await response.Content.ReadFromJsonAsync<LiveChat>();
-                if (json?.Items is null || json.Items.Length == 0)
+                if (json?.Items is null)
                 {
                     return Results.Problem(
                         title: "Not Found",
@@ -63,16 +64,25 @@ namespace playOn.Endpoints
                 }
 
                 //Database Update
-                if (json!.Items.Length > 0) {
-                    await db.AddLiveCommentsToEntityAsync(json!.Items, watchedEntity,[videoId, json!.Etag, pageNum], json?.NextPageToken);
-                }else if (nextToken!=null && json!.Items.Length == 0 && json?.NextPageToken != null)
+                try
                 {
-                    await db.UpdateLiveCommentsTokenAsync(nextToken,json!.NextPageToken);
+                    if (json!.Items.Length > 0)
+                    {
+                        await db.AddLiveCommentsToEntityAsync(json!.Items, watchedEntity, [videoId, json!.Etag, pageNum], json?.NextPageToken, json?.PollingIntervalMillis);
+                    }
+                    else if (nextToken != null && json!.Items.Length == 0 && json?.NextPageToken != null)
+                    {
+                        await db.UpdateLiveCommentsTokenAsync(nextToken, json.NextPageToken,json.PollingIntervalMillis);
+                    }
+                }
+                catch (DbUpdateException) // unique constraint violation
+                {
+                    db.ChangeTracker.Clear();
                 }
 
                 //Mapping json.Items to Dto
                 var comments = json!.Items.AsQueryable().MapLiveCommentToDto(json.Etag);
-                var data = new LiveCommentListDto { LiveCommentList = comments, QueryNextPage = json?.NextPageToken!=null };
+                var data = new LiveCommentListDto { LiveCommentList = comments, QueryNextPage = json?.NextPageToken!=null, PollingIntervalMillis = json?.PollingIntervalMillis};
                 return TypedResults.Ok(data);
             });
         }

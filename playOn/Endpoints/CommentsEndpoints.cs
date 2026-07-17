@@ -29,19 +29,23 @@ namespace playOn.Endpoints
                 }
                 var commentQuery = db.Comments.Where(c => c.VideoWatched.VId == videoId);
                 var count = await commentQuery.CountAsync();
-                var nextToken = await commentQuery.OrderByDescending(c => c.CommentId).Select(c => c.NextToken).FirstOrDefaultAsync();
+                
                 if (count >= Convert.ToInt16(pageNum) * 20)
                 {
-                    var commentsList = commentQuery
+                    var commentEntities = commentQuery
                         .AsNoTracking()
                         .OrderBy(c => c.CommentId)
                         .Skip((Convert.ToInt16(pageNum) - 1) * 20)
-                        .Take(20)
-                        .MapCommentEntityToDto();
-                    return TypedResults.Ok(new CommentsListDto { CommentsList = commentsList, QueryNextPage = nextToken != null });
+                        .Take(20);
+
+                    var commentsDto = commentEntities.MapCommentEntityToDto();
+                    var entity = await commentEntities.FirstOrDefaultAsync();
+                    return TypedResults.Ok(new CommentsListDto { CommentsList = commentsDto, QueryNextPage = entity?.NextToken != null });
                 }
 
                 //API Call
+                var lastEntity = await commentQuery.OrderByDescending(c => c.CommentId).FirstOrDefaultAsync();
+                var nextToken = count > 0 ? lastEntity?.NextToken : null;
                 var apiKey = configuration["YouTube:ApiKey"];
                 var client = factory.CreateClient("YouTubeClient");
                 var response = await client.GetAsync($"commentThreads?part=snippet%2Creplies{(nextToken != null ? "&pageToken=" + nextToken : "")}&videoId={videoId}&key={apiKey}");
@@ -66,7 +70,14 @@ namespace playOn.Endpoints
                 //Database Update
                 if (json!.Items.Length > 0)
                 {
-                    await db.AddCommentsToEntityAsync(json!.Items, watchedEntity, json.Etag, json?.NextPageToken);
+                    try
+                    {
+                        await db.AddCommentsToEntityAsync(json!.Items, watchedEntity, json.Etag, json?.NextPageToken);
+                    }
+                    catch (DbUpdateException) // unique constraint violation
+                    {
+                        db.ChangeTracker.Clear();
+                    }
                 }
 
                 //Mapping json.Items to Dto
