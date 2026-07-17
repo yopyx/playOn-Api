@@ -1,7 +1,6 @@
 using System;
 using System.Security.Cryptography;
 using DataLayer.EfCode;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.SqlServer.Server;
@@ -91,20 +90,20 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    try
-    {
-        var db = scope.ServiceProvider.GetRequiredService<EfCoreContext>();
-        db.Database.Migrate();
-    }
-    catch (Exception ex)
-    {
-        // log critical failure
-        Console.WriteLine("Migration failed: " + ex.Message);
-        throw; // optional
-    }
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    try
+//    {
+//        var db = scope.ServiceProvider.GetRequiredService<EfCoreContext>();
+//        db.Database.Migrate();
+//    }
+//    catch (Exception ex)
+//    {
+//        // log critical failure
+//        Console.WriteLine("Migration failed: " + ex.Message);
+//        throw; // optional
+//    }
+//}
 
 if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
