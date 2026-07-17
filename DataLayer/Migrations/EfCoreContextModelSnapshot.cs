@@ -32,7 +32,7 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("ChId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Statistics")
                         .IsRequired()
@@ -47,6 +47,9 @@ namespace DataLayer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ChannelId");
+
+                    b.HasIndex("ChId")
+                        .IsUnique();
 
                     b.ToTable("Channels");
                 });
@@ -69,7 +72,7 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("CId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("LikeCount")
                         .HasColumnType("int");
@@ -97,6 +100,9 @@ namespace DataLayer.Migrations
 
                     b.HasKey("CommentId");
 
+                    b.HasIndex("CId")
+                        .IsUnique();
+
                     b.HasIndex("VideoWatchedId");
 
                     b.ToTable("Comments");
@@ -118,7 +124,8 @@ namespace DataLayer.Migrations
 
                     b.HasKey("HistoryId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("History");
                 });
@@ -159,7 +166,7 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("CId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("DisplayMessage")
                         .IsRequired()
@@ -180,6 +187,9 @@ namespace DataLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("PollingIntervalMillis")
+                        .HasColumnType("int");
+
                     b.Property<string>("ProfileImageUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -192,6 +202,9 @@ namespace DataLayer.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("LiveChatCommentId");
+
+                    b.HasIndex("CId")
+                        .IsUnique();
 
                     b.HasIndex("VideoWatchedId");
 
@@ -253,13 +266,16 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("VideoListEtag")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("SearchKeyId");
+
+                    b.HasIndex("Title")
+                        .IsUnique();
 
                     b.ToTable("SearchKeys");
                 });
@@ -300,7 +316,7 @@ namespace DataLayer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NextToken")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("PublishedAt")
                         .IsRequired()
@@ -327,13 +343,17 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("VId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("SearchResultedVideoId");
 
                     b.HasIndex("ChannelId");
 
                     b.HasIndex("SearchKeyId");
+
+                    b.HasIndex("VId", "NextToken")
+                        .IsUnique()
+                        .HasFilter("[NextToken] IS NOT NULL");
 
                     b.ToTable("VideoResults");
                 });
@@ -352,9 +372,12 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("SearchSuggestionsId");
+
+                    b.HasIndex("Title")
+                        .IsUnique();
 
                     b.ToTable("SearchSuggestions");
                 });
@@ -369,9 +392,12 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("UId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("UserId");
+
+                    b.HasIndex("UId")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -412,7 +438,7 @@ namespace DataLayer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NextToken")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("PublishedAt")
                         .IsRequired()
@@ -436,7 +462,7 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("VId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("VideoCategoryId")
                         .HasColumnType("int");
@@ -446,6 +472,10 @@ namespace DataLayer.Migrations
                     b.HasIndex("ChannelId");
 
                     b.HasIndex("VideoCategoryId");
+
+                    b.HasIndex("VId", "NextToken")
+                        .IsUnique()
+                        .HasFilter("[NextToken] IS NOT NULL");
 
                     b.ToTable("Videos");
                 });
@@ -467,9 +497,12 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("VCId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("VideoCategoryId");
+
+                    b.HasIndex("VCId")
+                        .IsUnique();
 
                     b.ToTable("VideoCategories");
                 });
@@ -527,11 +560,14 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("VId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("VideoWatchedId");
 
                     b.HasIndex("ChannelId");
+
+                    b.HasIndex("VId")
+                        .IsUnique();
 
                     b.ToTable("VideosWatched");
                 });
