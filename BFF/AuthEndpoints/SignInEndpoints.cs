@@ -11,7 +11,7 @@ namespace BFF.AuthEndpoints
         {
             app.MapGet("/login", () =>
             {
-                return Results.Challenge(new AuthenticationProperties { RedirectUri = "https://localhost:7117/spa/main_page" },
+                return Results.Challenge(new AuthenticationProperties { RedirectUri = "http://localhost:7117/spa/main_page" },
                               [OpenIdConnectDefaults.AuthenticationScheme]);
             });
         }
