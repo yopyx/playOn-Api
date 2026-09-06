@@ -21,5 +21,10 @@ namespace DataLayer.QueryObjects
             await db.VideoCategories.AddRangeAsync(entities);
             await db.SaveChangesAsync();
         }
+        public static async Task UpdateCategoriesEntitiesAsync(this EfCoreContext db, VideoCategory category)
+        {
+            category.PageNum++;
+            await db.SaveChangesAsync();
+        }
     }
 }
