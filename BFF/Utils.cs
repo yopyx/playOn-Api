@@ -11,9 +11,10 @@ namespace BFF
     public static class Utils
     {
         public static async Task<IResult> SignOut(HttpContext http, IConfiguration configuration,string? idToken) {
-            var logoutUrl = $"{configuration["OIDC:Authority"]}/protocol/openid-connect/logout" +
+            // for containers, you may need to use the internal network address of the Keycloak server instead of localhost
+            var logoutUrl = $"{configuration["OIDC:PublicAuthority"]}/protocol/openid-connect/logout" +
             $"?id_token_hint={idToken}" +
-            $"&post_logout_redirect_uri=https://localhost:7117/spa/landing_page";
+            $"&post_logout_redirect_uri=http://localhost:7117/spa/landing_page";
 
             http.Session.Clear();
             await http.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
