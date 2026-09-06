@@ -76,7 +76,7 @@ namespace DataLayer.EfCode
             // This way, if another request tries to insert a SearchKey with the same Title
             // while the first request is still processing, it will fail due to the unique constraint,
             // effectively acting as a semaphore.
-            modelBuilder.Entity<Channel>()
+            modelBuilder.Entity<Channel>()  
                 .HasIndex(k => k.ChId)
                 .IsUnique();
 
@@ -93,38 +93,34 @@ namespace DataLayer.EfCode
             //    .IsUnique();
 
             modelBuilder.Entity<LiveChatComment>()
-                .HasIndex(k => k.CId)
+                .HasIndex(k => new { k.CId, k.PageNum })
                 .IsUnique();
 
-            //modelBuilder.Entity<NestedComment>()
-            //    .HasIndex(k => k.CId)
-            //    .IsUnique();
-
-            modelBuilder.Entity<SearchKey>()
+            modelBuilder.Entity<SearchKey>() 
                 .HasIndex(k => k.Title)
                 .IsUnique();
 
-            modelBuilder.Entity<SearchResultedVideo>()
-                .HasIndex(k => new { k.VId, k.NextToken })
+            modelBuilder.Entity<SearchResultedVideo>() 
+                .HasIndex(k => new { k.VId, k.PageNum })
                 .IsUnique();
 
-            modelBuilder.Entity<SearchSuggestions>()
+            modelBuilder.Entity<SearchSuggestions>() 
                 .HasIndex(k => k.Title)
                 .IsUnique();
 
-            modelBuilder.Entity<User>()
+            modelBuilder.Entity<User>() 
                 .HasIndex(k => k.UId)
                 .IsUnique();
 
-            modelBuilder.Entity<Video>()
-                .HasIndex(k => new { k.VId,k.NextToken})
+            modelBuilder.Entity<Video>() 
+                .HasIndex(k => new { k.VId,k.PageNum })
                 .IsUnique();
 
-            modelBuilder.Entity<VideoCategory>()
+            modelBuilder.Entity<VideoCategory>() 
                 .HasIndex(k => k.VCId)
                 .IsUnique();
 
-            modelBuilder.Entity<VideoWatched>()
+            modelBuilder.Entity<VideoWatched>() 
                 .HasIndex(k => k.VId)
                 .IsUnique();
 
