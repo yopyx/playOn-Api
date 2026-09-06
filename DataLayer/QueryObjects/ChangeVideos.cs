@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Azure;
 using DataLayer.EfClasses;
 using DataLayer.EfCode;
 using Microsoft.EntityFrameworkCore;
@@ -14,13 +15,13 @@ namespace DataLayer.QueryObjects
 {
     public static class ChangeVideos
     {
-        public static async Task AddVideosToEntityAsync(this EfCoreContext db, VideoDataFromApi[] videos, VideoCategory videoCategory, IQueryable<Channel> channels, string listEtag, string? token) {
+        public static async Task AddVideosToEntitiesAsync(this EfCoreContext db, VideoDataFromApi[] videos, IQueryable<Channel> channels, string listEtag, string? token,VideoCategory categoryEntity) {
             var hashMap = new Dictionary<string, Channel>();
             foreach (var c in channels)
             {
                 hashMap[c.ChId] = c;
             }
-            var defaultChannel = await db.Channels.SingleOrDefaultAsync(c => c.ChannelId == 1);
+            var defaultChannel = await db.Channels.FirstOrDefaultAsync(c => c.ChannelId == 1);
             var entities = videos.Select(v => new Video
             {
                 VId = v.Id,
@@ -36,8 +37,9 @@ namespace DataLayer.QueryObjects
                 Etag = v.Etag,
                 ListEtag = listEtag,
                 NextToken = token,
+                PageNum = categoryEntity.PageNum,
                 Channel = hashMap.TryGetValue(v.Snippet.ChannelId, out var value) ? value: defaultChannel!,
-                VideoCategory = videoCategory,
+                VideoCategory = categoryEntity,
             });
 
             await db.Videos.AddRangeAsync(entities);

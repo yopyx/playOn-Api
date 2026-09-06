@@ -15,7 +15,7 @@ namespace DataLayer.QueryObjects
     {
         public static async Task AddApiDataToWatchedEntityAsync(this EfCoreContext db,IQueryable<Channel> channel, VideoDataFromApi v, string sub,User? user)
         {
-            var defaultChannel = await db.Channels.SingleOrDefaultAsync(c => c.ChannelId == 1);
+            var defaultChannel = await db.Channels.FirstOrDefaultAsync(c => c.ChannelId == 1);
 
             var entity = new VideoWatched
             {
@@ -30,7 +30,7 @@ namespace DataLayer.QueryObjects
                 Statistics = v.Statistics,
                 LiveStreamingDetails = v.LiveStreamingDetails ?? [],
                 Etag = v.Etag,
-                Channel = channel.SingleOrDefault()??defaultChannel!,
+                Channel = channel.FirstOrDefault()??defaultChannel!,
             };
             await db.VideosWatched.AddAsync(entity);
             await db.AddWatchedEntityToUserHistoryAsync(user,entity,sub);

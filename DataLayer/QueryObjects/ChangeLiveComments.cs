@@ -22,7 +22,7 @@ namespace DataLayer.QueryObjects
                 DisplayName = c.AuthorDetails.DisplayName,
                 ProfileImageUrl = c.AuthorDetails.ProfileImageUrl,
                 ListEtag = props[1],
-                PageNo = props[2],
+                PageNum = Convert.ToInt16(props[2]),
                 NextToken = token,
                 VideoWatched = video,
                 PollingIntervalMillis = pollingIntervalMillis
