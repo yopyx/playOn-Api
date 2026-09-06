@@ -12,6 +12,7 @@ namespace DataLayer.EfClasses
         public string VCId { get; set; } = string.Empty;
         public string? Etag { get; set; }
         public string Title { get; set; } = string.Empty;
+        public int PageNum { get; set; }
 
 
         //Relationships

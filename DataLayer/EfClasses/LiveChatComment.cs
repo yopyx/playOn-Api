@@ -15,7 +15,7 @@ namespace DataLayer.EfClasses
         public string DisplayName { get; set; } = string.Empty;
         public string ProfileImageUrl { get; set; } = string.Empty;
         public string ListEtag { get; set; } = string.Empty;
-        public string PageNo { get; set; } = string.Empty;
+        public int PageNum { get; set; }
         public string? NextToken { get; set; }
         public int? PollingIntervalMillis { get; set; }
 

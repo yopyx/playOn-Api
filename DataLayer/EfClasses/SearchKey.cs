@@ -10,7 +10,7 @@ namespace DataLayer.EfClasses
     {
         public int SearchKeyId { get; set; }
         public string Title { get; set; } = string.Empty;
-        public string VideoListEtag { get; set; } = string.Empty;
+        public int PageNum { get; set; }
 
         //Relationships
 
