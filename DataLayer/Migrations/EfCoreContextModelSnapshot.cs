@@ -124,7 +124,8 @@ namespace DataLayer.Migrations
 
                     b.HasKey("HistoryId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("History");
                 });
@@ -182,9 +183,8 @@ namespace DataLayer.Migrations
                     b.Property<string>("NextToken")
                         .HasColumnType("text");
 
-                    b.Property<string>("PageNo")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("PageNum")
+                        .HasColumnType("integer");
 
                     b.Property<int?>("PollingIntervalMillis")
                         .HasColumnType("integer");
@@ -202,10 +202,10 @@ namespace DataLayer.Migrations
 
                     b.HasKey("LiveChatCommentId");
 
-                    b.HasIndex("CId")
-                        .IsUnique();
-
                     b.HasIndex("VideoWatchedId");
+
+                    b.HasIndex("CId", "PageNum")
+                        .IsUnique();
 
                     b.ToTable("LiveComments");
                 });
@@ -263,11 +263,10 @@ namespace DataLayer.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SearchKeyId"));
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("PageNum")
+                        .HasColumnType("integer");
 
-                    b.Property<string>("VideoListEtag")
+                    b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -317,6 +316,9 @@ namespace DataLayer.Migrations
                     b.Property<string>("NextToken")
                         .HasColumnType("text");
 
+                    b.Property<int>("PageNum")
+                        .HasColumnType("integer");
+
                     b.Property<string>("PublishedAt")
                         .IsRequired()
                         .HasColumnType("text");
@@ -350,7 +352,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("SearchKeyId");
 
-                    b.HasIndex("VId", "NextToken")
+                    b.HasIndex("VId", "PageNum")
                         .IsUnique();
 
                     b.ToTable("VideoResults");
@@ -438,6 +440,9 @@ namespace DataLayer.Migrations
                     b.Property<string>("NextToken")
                         .HasColumnType("text");
 
+                    b.Property<int>("PageNum")
+                        .HasColumnType("integer");
+
                     b.Property<string>("PublishedAt")
                         .IsRequired()
                         .HasColumnType("text");
@@ -471,7 +476,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("VideoCategoryId");
 
-                    b.HasIndex("VId", "NextToken")
+                    b.HasIndex("VId", "PageNum")
                         .IsUnique();
 
                     b.ToTable("Videos");
@@ -487,6 +492,9 @@ namespace DataLayer.Migrations
 
                     b.Property<string>("Etag")
                         .HasColumnType("text");
+
+                    b.Property<int>("PageNum")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
