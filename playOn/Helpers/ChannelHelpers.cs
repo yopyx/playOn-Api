@@ -3,6 +3,7 @@ using DataLayer.EfCode;
 using DataLayer.QueryObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using playOn.Contracts;
 using ServiceLayer.VideoServices;
 using ServiceLayer.VideoServices.QueryObjects;
@@ -58,14 +59,17 @@ namespace playOn.Helpers
                 {
                     await _db.AddChannelsToEntity(json.Items);
                 }
-                catch (DbUpdateException)
+                catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
                 {
-                    _db.ChangeTracker.Clear();
+                    // Someone else already wrote this — not a real error, just detach and re-read.
+                    foreach (var entry in _db.ChangeTracker.Entries().Where(e => e.State == EntityState.Added))
+                        entry.State = EntityState.Detached;
                 }
             }
             
             //Mapping entities to Dto
-            var channels = await _db.Channels.Where(c => channelsIds.Contains(c.ChId)).ToListAsync();
+            var idsHash = channelsIds.ToHashSet();
+            var channels = await _db.Channels.Where(c => idsHash.Contains(c.ChId)).ToListAsync();
 
             return channels.AsQueryable();
         }
