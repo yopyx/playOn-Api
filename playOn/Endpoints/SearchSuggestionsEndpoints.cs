@@ -8,6 +8,7 @@ using DataLayer.QueryObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace playOn.Endpoints
 {
@@ -20,7 +21,7 @@ namespace playOn.Endpoints
 
                 //Database Query
                 q = q.Trim().ToLower();
-                var entity = await db.SearchSuggestions.AsNoTracking().SingleOrDefaultAsync(s => s.Title==q);
+                var entity = await db.SearchSuggestions.AsNoTracking().FirstOrDefaultAsync(s => s.Title==q);
                 if (entity != null)
                 {
                     return TypedResults.Ok(entity.Suggestions);
@@ -52,9 +53,12 @@ namespace playOn.Endpoints
                     try {
                         await db.AddSuggestionsToEntityAsync(q, list!);
                     }
-                    catch (DbUpdateException) // unique constraint violation
+                    // unique constraint violation
+                    catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
                     {
-                        db.ChangeTracker.Clear();
+                        // Someone else already wrote this — not a real error, just detach and re-read.
+                        foreach (var entry in db.ChangeTracker.Entries().Where(e => e.State == EntityState.Added))
+                            entry.State = EntityState.Detached;
                     }
                 }
 
