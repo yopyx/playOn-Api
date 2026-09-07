@@ -3,6 +3,7 @@ using DataLayer.QueryObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using playOn.Contracts;
 using ServiceLayer.VideoServices;
 using ServiceLayer.VideoServices.QueryObjects;
@@ -20,7 +21,7 @@ namespace playOn.Endpoints
                 var count = await db.VideoCategories.CountAsync();
                 if (count > 1)
                 {
-                    return TypedResults.Ok(db.VideoCategories.AsNoTracking().MapCategoryEntityToDto());
+                    return TypedResults.Ok(db.VideoCategories.OrderBy(vc => vc.VideoCategoryId).AsNoTracking().MapCategoryEntityToDto());
                 }
 
                 //API Call
@@ -49,9 +50,11 @@ namespace playOn.Endpoints
                 {
                     await db.AddCategoriesToEntity(filteredItems);
                 }
-                catch (DbUpdateException) // unique constraint violation
+                catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
                 {
-                    db.ChangeTracker.Clear();
+                    // Someone else already wrote this — not a real error, just detach and re-read.
+                    foreach (var entry in db.ChangeTracker.Entries().Where(e => e.State == EntityState.Added))
+                        entry.State = EntityState.Detached;
                 }
 
                 //Mapping filteredItems to Dto
