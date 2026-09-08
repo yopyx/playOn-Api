@@ -61,11 +61,9 @@ builder.Services.AddHttpClient("YouTubeClient", client =>
     client.BaseAddress = new Uri(@"https://youtube.googleapis.com/youtube/v3/");
 });
 
-var connection = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<EfCoreContext>(options =>
-{
-    options.UseSqlServer(connection);
-});
+
+builder.Services.AddDbContext<EfCoreContext>(opt =>
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 if (builder.Environment.IsDevelopment())
 {
@@ -83,8 +81,8 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("BFFOnly", policy =>
     {
-        policy.WithOrigins("https://localhost:7117",
-    "https://127.0.0.1:7117").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+        policy.WithOrigins("http://localhost:7117",
+    "http://127.0.0.1:7117", "http://bff:8080").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
     });
 });
 
@@ -111,9 +109,9 @@ if (app.Environment.IsDevelopment()) {
     app.UseDeveloperExceptionPage();
 }
 
-app.UseHttpsRedirection();
-app.UseCors("BFFOnly");
+//app.UseHttpsRedirection();
 app.UseRouting();
+app.UseCors("BFFOnly");
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -121,7 +119,7 @@ app.UseAuthorization();
 
 
 // Protected API Resources
-var resourceApi = app.MapGroup("/api");
+var resourceApi = app.MapGroup("/resources_api");
 resourceApi.MapVideoCategoriesEndpoints();
 resourceApi.MapPopularVideosEndpoints();
 resourceApi.MapSearchSuggestionsEndpoints();
