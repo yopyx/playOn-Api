@@ -9,9 +9,8 @@ namespace BFF.AuthEndpoints
 {
     public static class ProtectedResourcesEndpoints
     {
-        public static void MapProtectedResourcesEndpoints(this WebApplication app) {
-
-            app.MapGet("/resources_api/video_categories", [Authorize] async (HttpContext http, IHttpClientFactory factory,IConfiguration configuration) => {
+        public static void MapProtectedResourcesEndpoints(this RouteGroupBuilder resourcesGroup) {
+            resourcesGroup.MapGet("/video_categories", [Authorize] async (HttpContext http, IHttpClientFactory factory,IConfiguration configuration) => {
                 // Token was validated/refreshed by middleware; just pull it from context
                 var accessToken = (http.Items["access_token"]) as string;
 
@@ -38,7 +37,7 @@ namespace BFF.AuthEndpoints
                 );
             });
 
-            app.MapGet("/resources_api/recommended_videos", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration, string VideoCategoryId, string pageNum) => {
+            resourcesGroup.MapGet("/recommended_videos", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration, string VideoCategoryId, string pageNum) => {
                 // Token was validated/refreshed by middleware; just pull it from context
                 var accessToken = (http.Items["access_token"]) as string;
 
@@ -64,7 +63,7 @@ namespace BFF.AuthEndpoints
                 );
             });
 
-            app.MapGet("/resources_api/search_suggestions", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration,string q) => {
+            resourcesGroup.MapGet("/search_suggestions", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration,string q) => {
                 // Token was validated/refreshed by middleware; just pull it from context
                 var accessToken = (http.Items["access_token"]) as string;
 
@@ -90,7 +89,7 @@ namespace BFF.AuthEndpoints
                 );
             });
 
-            app.MapGet("/resources_api/search_results", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration, string q, string pageNum) => {
+            resourcesGroup.MapGet("/search_results", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration, string q, string pageNum) => {
                 // Token was validated/refreshed by middleware; just pull it from context
                 var accessToken = (http.Items["access_token"]) as string;
 
@@ -116,7 +115,7 @@ namespace BFF.AuthEndpoints
                 );
             });
 
-            app.MapGet("/resources_api/watch_video", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration, string videoId) => {
+            resourcesGroup.MapGet("/watch_video", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration, string videoId) => {
                 // Token was validated/refreshed by middleware; just pull it from context
                 var accessToken = (http.Items["access_token"]) as string;
 
@@ -142,7 +141,7 @@ namespace BFF.AuthEndpoints
                 );
             });
 
-            app.MapGet("/resources_api/comments", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration, string videoId, string pageNum) => {
+            resourcesGroup.MapGet("/comments", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration, string videoId, string pageNum) => {
                 // Token was validated/refreshed by middleware; just pull it from context
                 var accessToken = (http.Items["access_token"]) as string;
 
@@ -168,7 +167,7 @@ namespace BFF.AuthEndpoints
                 );
             });
 
-            app.MapGet("/resources_api/replies", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration, string commentId) => {
+            resourcesGroup.MapGet("/replies", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration, string commentId) => {
                 // Token was validated/refreshed by middleware; just pull it from context
                 var accessToken = (http.Items["access_token"]) as string;
 
@@ -195,7 +194,7 @@ namespace BFF.AuthEndpoints
                 );
             });
 
-            app.MapGet("/resources_api/liveChat", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration, string videoId, string pageNum) => {
+            resourcesGroup.MapGet("/liveChat", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration, string videoId, string pageNum) => {
                 // Token was validated/refreshed by middleware; just pull it from context
                 var accessToken = (http.Items["access_token"]) as string;
 
@@ -221,7 +220,7 @@ namespace BFF.AuthEndpoints
                 );
             });
 
-            app.MapGet("/resources_api/feed_history", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration) => {
+            resourcesGroup.MapGet("/feed_history", [Authorize] async (HttpContext http, IHttpClientFactory factory, IConfiguration configuration) => {
                 // Token was validated/refreshed by middleware; just pull it from context
                 var accessToken = (http.Items["access_token"]) as string;
 
