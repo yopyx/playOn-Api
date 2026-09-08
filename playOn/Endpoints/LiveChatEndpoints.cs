@@ -4,6 +4,7 @@ using DataLayer.QueryObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using playOn.Contracts;
 using ServiceLayer.CommentServices;
 using ServiceLayer.CommentServices.QueryObjects;
@@ -19,7 +20,7 @@ namespace playOn.Endpoints
             {
 
                 //Database Query
-                var watchedEntity = await db.VideosWatched.SingleOrDefaultAsync(v => v.VId == videoId);
+                var watchedEntity = await db.VideosWatched.FirstOrDefaultAsync(v => v.VId == videoId);
                 
                 if(watchedEntity is null || watchedEntity?.LiveStreamingDetails["activeLiveChatId"] is null)
                 {
@@ -29,13 +30,16 @@ namespace playOn.Endpoints
                         statusCode: 404
                     );
                 }
+                var page = Convert.ToInt32(pageNum);
                 var commentQuery = db.LiveComments.Where(c => c.VideoWatched.VId == videoId);
                 var lastEntity = await commentQuery.OrderByDescending(c => c.LiveChatCommentId).FirstOrDefaultAsync();
                 var nextToken = lastEntity?.NextToken;
-                if (commentQuery.Any() && pageNum=="1")
+                if (page <= lastEntity?.PageNum)
                 {
                     var liveCommentDtos = commentQuery.AsNoTracking()
-                        .OrderBy(c => c.LiveChatCommentId).MapLiveCommentEntityToDto();
+                        .Where(c => c.PageNum == page)
+                        .OrderBy(c => c.LiveChatCommentId)
+                        .MapLiveCommentEntityToDto();
 
                     return TypedResults.Ok(new LiveCommentListDto { LiveCommentList = liveCommentDtos, QueryNextPage = nextToken!=null, PollingIntervalMillis= lastEntity?.PollingIntervalMillis });
                 }
@@ -75,9 +79,12 @@ namespace playOn.Endpoints
                         await db.UpdateLiveCommentsTokenAsync(nextToken, json.NextPageToken,json.PollingIntervalMillis);
                     }
                 }
-                catch (DbUpdateException) // unique constraint violation
+                // unique constraint violation
+                catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
                 {
-                    db.ChangeTracker.Clear();
+                    // Someone else already wrote this — not a real error, just detach and re-read.
+                    foreach (var entry in db.ChangeTracker.Entries().Where(e => e.State == EntityState.Added))
+                        entry.State = EntityState.Detached;
                 }
 
                 //Mapping json.Items to Dto
