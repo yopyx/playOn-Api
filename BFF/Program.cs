@@ -1,3 +1,5 @@
+using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using BFF;
 using BFF.AuthEndpoints;
@@ -6,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using static BFF.Models;
 
@@ -16,21 +19,20 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //Register the EF Core context for Data Protection key storage
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<EfCoreContext>(options =>
-    options.UseSqlServer(connectionString)
-);
+builder.Services.AddDbContext<EfCoreContext>(opt =>
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Install: dotnet add package Microsoft.AspNetCore.DataProtection.EntityFrameworkCore
 builder.Services.AddDataProtection()
     .PersistKeysToDbContext<EfCoreContext>() // keys stored in SQL Server
     .SetApplicationName("playOn-bff");      // must match across restarts
 
-builder.Services.AddDistributedMemoryCache();
-//builder.Services.AddStackExchangeRedisCache(options =>
-//{
-//    options.Configuration = builder.Configuration.GetConnectionString("Redis");
-//});
+//builder.Services.AddDistributedMemoryCache();
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration["Redis:ConnectionString"];
+    options.InstanceName = "PlayOn:"; // optional key prefix, useful if sharing one Redis DB across services
+});
 
 builder.Services.AddSession(options => {
     options.Cookie.Name = "session_id";
@@ -38,7 +40,7 @@ builder.Services.AddSession(options => {
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.None;    //lax    // Required for external OIDC sign-in
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromHours(1);   // was TimeSpan.FromMinutes(30);
 
 });
 
@@ -53,7 +55,7 @@ builder.Services.AddAuthentication(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.None;        // Required for external OIDC sign-in
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Session cookie lifetime
+    options.ExpireTimeSpan = TimeSpan.FromHours(1); // Session cookie lifetime _ was TimeSpan.FromMinutes(30);
     options.SlidingExpiration = true;                  // Renew cookie if nearly expired
     //options.LoginPath = "/";
 
@@ -76,6 +78,7 @@ builder.Services.AddAuthentication(options =>
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             return Task.CompletedTask;
         }
+       
     };
 
 }).AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
@@ -95,7 +98,9 @@ builder.Services.AddAuthentication(options =>
     if (builder.Environment.IsDevelopment())
     {
         options.RequireHttpsMetadata = false;
+        IdentityModelEventSource.ShowPII = true;
     }
+
     // By default 'openid' and 'profile' are added
     // OpenID Connect scope for add user roles to the access token
     // for refresh tokens
@@ -133,25 +138,46 @@ builder.Services.AddAuthentication(options =>
 
             // Use the session ID as the store key
             await context.HttpContext.Session.LoadAsync();
-            var sessionId = context.HttpContext.Session.Id;
+
+            // getting sessionId
+            var sessionId = context.HttpContext.Session.Id; // sessionId is unique per user session, but it can change after expiry and re-login, so we don't use it as the key to store tokens in the distributed cache
+            var rawIdTokenStr = context.TokenEndpointResponse.IdToken;
 
             // Store id_token for logout hint
             context.HttpContext.Session.SetString(
                 "id_token",
-                context.TokenEndpointResponse.IdToken  // ? the raw id_token string
+                rawIdTokenStr  // ? the raw id_token string
             );
 
+            // pull "sub" straight off the raw id_token.
+            // OnTokenValidated hasn't run yet at this point in the pipeline, so context.Principal isn't populated —
+            // reading the JWT directly is the reliable way to get a stable id this early.
+            var idToken = new JwtSecurityTokenHandler().ReadJwtToken(rawIdTokenStr);
+            var stableUserId = idToken.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (string.IsNullOrEmpty(stableUserId)) return;  // spec-compliant IdP always sends this, but don't store under null
+            
             var expiresIn = int.TryParse(context.TokenEndpointResponse.ExpiresIn, out var seconds)
                 ? seconds : 3600;
 
-            await tokenStore.SaveAsync(sessionId, new TokenData(
+            // we used stableUserId(instead of sessionId-which can be changed after expiry-) as the key to store the tokens
+            // in the distributed cache, so that we can retrieve them later for token refresh
+            await tokenStore.SaveAsync(stableUserId, new TokenData(
                 AccessToken: context.TokenEndpointResponse.AccessToken,
                 RefreshToken: context.TokenEndpointResponse.RefreshToken,
-                IdToken: context.TokenEndpointResponse.IdToken,
+                IdToken: rawIdTokenStr,
                 ExpiresAt: DateTimeOffset.UtcNow.AddSeconds(expiresIn),
                 LastIntrospectedAt: DateTimeOffset.UtcNow));
         },
-
+        OnRedirectToIdentityProvider = context =>
+        {
+            if(context.Request.Path.StartsWithSegments("/api") || context.Request.Path.StartsWithSegments("/user_profile"))
+            {
+                // Prevent redirect loops in API calls
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                context.HandleResponse(); // Suppress the redirect
+            }
+            return Task.CompletedTask;
+        },
         OnRedirectToIdentityProviderForSignOut = async context =>
         {
             var tokenStore = context.HttpContext.RequestServices
@@ -159,10 +185,13 @@ builder.Services.AddAuthentication(options =>
 
             // Use the session ID as the store key
             await context.HttpContext.Session.LoadAsync();
-            var sessionId = context.HttpContext.Session.Id;
-
+            var sessionId = context.HttpContext.Session.Id; // sessionId is unique per user session, but it can change after expiry and re-login, so we don't use it as the key to store tokens in the distributed cache
+            var stableUserId = context.HttpContext.User.FindFirst("sub")?.Value;
             // Clean up tokens on logout
-            await tokenStore.RemoveAsync(sessionId);
+            if(!string.IsNullOrEmpty(stableUserId))
+            {
+                await tokenStore.RemoveAsync(stableUserId);
+            }
         },
 
         OnTokenValidated = context => {
@@ -207,7 +236,7 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddHttpClient("ApiClient", client =>
 {
-    client.BaseAddress = new Uri(@"https://localhost:7287/api/");
+    client.BaseAddress = new Uri(@$"{builder.Configuration["ResourceApi:BaseUrl"]}/resources_api/");
 });
 
 builder.Services.AddHttpClient("KeycloakClient", client =>
@@ -219,8 +248,8 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("ClientOnly", policy =>
     {
-        policy.WithOrigins("https://localhost:5173",
-    "https://127.0.0.1:5173").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+        policy.WithOrigins("http://localhost:5173",
+    "http://127.0.0.1:5173").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
     });
 });
 
@@ -251,6 +280,7 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
+app.UseSession();
 app.Use(async (ctx, next) =>
 {
     await next();
@@ -271,10 +301,10 @@ app.Use(async (ctx, next) =>
     }
 });
 
-app.UseHttpsRedirection();
-app.UseCors("ClientOnly");
-app.UseSession();
+//app.UseHttpsRedirection();
+
 app.UseRouting();
+app.UseCors("ClientOnly");
 app.UseAuthentication();
 app.UseMiddleware<TokenRefreshMiddleware>();
 app.UseAuthorization();
@@ -298,7 +328,8 @@ app.MapLandingPagesEndpoints();
 
 app.MapUserEndpoints();
 
-app.MapProtectedResourcesEndpoints();
+var resourcesGroup = app.MapGroup("/api");
+resourcesGroup.MapProtectedResourcesEndpoints();
 
 app.MapGet("/debug/auth", async (HttpContext ctx) =>
 {
