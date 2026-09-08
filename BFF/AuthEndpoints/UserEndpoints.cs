@@ -7,7 +7,7 @@ namespace BFF.AuthEndpoints
     {
         public static void MapUserEndpoints(this WebApplication app)
         {
-            app.MapGet("/userinfo", [Authorize] (HttpContext http) =>
+            app.MapGet("/user_profile/userinfo", [Authorize] (HttpContext http) =>
             {
                 //var username = http.User.Identity?.Name;
                 var username = http.User.FindFirst(ClaimTypes.Name)?.Value;
