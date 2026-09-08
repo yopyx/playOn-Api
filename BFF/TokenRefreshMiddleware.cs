@@ -14,11 +14,11 @@ namespace BFF
         private readonly RequestDelegate _next = next;
         private readonly ILogger<TokenRefreshMiddleware> _logger = logger;
 
-        public async Task InvokeAsync(HttpContext context, ITokenRefreshService refreshService,IConfiguration configuration)
+        public async Task InvokeAsync(HttpContext context, ITokenRefreshService refreshService)
         {
             // Only apply to authenticated API routes
             if (context.User.Identity?.IsAuthenticated == true &&
-                context.Request.Path.StartsWithSegments("/resources_api"))
+                context.Request.Path.StartsWithSegments("/api"))
             {
                 await context.Session.LoadAsync();
                 _logger.LogWarning("Session ID: {SessionId}, IsAvailable: {IsAvailable}",
