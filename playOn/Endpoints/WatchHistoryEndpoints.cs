@@ -16,7 +16,7 @@ namespace playOn.Endpoints
                 //Extracting sub from claims principle
                 var sub = http.User.FindFirst("sub")?.Value;
 
-                var user = await db.Users.SingleOrDefaultAsync(u => u.UId==sub);
+                var user = await db.Users.FirstOrDefaultAsync(u => u.UId==sub);
                 var records = await db.Set<History>().AsNoTracking()
                     .Where(h => h.User.UId == sub)
                     .OrderByDescending(h => h.HistoryId)

@@ -5,6 +5,7 @@ using DataLayer.QueryObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 using playOn.Contracts;
 using playOn.Helpers;
 using ServiceLayer.VideoServices;
@@ -25,19 +26,20 @@ namespace playOn.Endpoints
                     .ThenInclude(h => h.VideoWatchedLinks)
                     .ThenInclude(hv => hv.VideoWatched)
                     .ThenInclude(v => v.Channel)
-                    .SingleOrDefaultAsync(u => u.UId == sub);
-
+                    .FirstOrDefaultAsync(u => u.UId == sub);
                 //Database Query
-                var videoWatched = await db.VideosWatched.Include(v => v.Channel).SingleOrDefaultAsync(v => v.VId == videoId);
+                var videoWatched = await db.VideosWatched.Include(v => v.Channel).FirstOrDefaultAsync(v => v.VId == videoId);
                 if (videoWatched != null)
                 {
                     try
                     {
                         await db.AddWatchedEntityToUserHistoryAsync(user, videoWatched, sub!);
                     }
-                    catch (DbUpdateException) // unique constraint violation
+                    catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
                     {
-                        db.ChangeTracker.Clear();
+                        // Someone else already wrote this — not a real error, just detach and re-read.
+                        foreach (var entry in db.ChangeTracker.Entries().Where(e => e.State == EntityState.Added))
+                            entry.State = EntityState.Detached;
                     }
                     return TypedResults.Ok(videoWatched.MapOneWatchedEntityToDto(null));
                 }
@@ -50,9 +52,11 @@ namespace playOn.Endpoints
                     {
                         await db.AddVideoToWatchedEntityAsync(video, sub!, user);
                     }
-                    catch (DbUpdateException)
+                    catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
                     {
-                        db.ChangeTracker.Clear();
+                        // Someone else already wrote this — not a real error, just detach and re-read.
+                        foreach (var entry in db.ChangeTracker.Entries().Where(e => e.State == EntityState.Added))
+                            entry.State = EntityState.Detached;
                     }
                     return TypedResults.Ok(video.MapOneVideoEntityToDto());
                 }
@@ -64,9 +68,11 @@ namespace playOn.Endpoints
                     {
                         await db.AddResultToWatchedEntityAsync(searchResult, sub!, user);
                     }
-                    catch (DbUpdateException)
+                    catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
                     {
-                        db.ChangeTracker.Clear();
+                        // Someone else already wrote this — not a real error, just detach and re-read.
+                        foreach (var entry in db.ChangeTracker.Entries().Where(e => e.State == EntityState.Added))
+                            entry.State = EntityState.Detached;
                     }
                     return TypedResults.Ok(searchResult.MapOneResultEntityToDto());
                 }
@@ -105,9 +111,11 @@ namespace playOn.Endpoints
                 {
                     await db.AddApiDataToWatchedEntityAsync(channelsList, json.Items[0], sub!, user);
                 }
-                catch (DbUpdateException)
+                catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
                 {
-                    db.ChangeTracker.Clear();
+                    // Someone else already wrote this — not a real error, just detach and re-read.
+                    foreach (var entry in db.ChangeTracker.Entries().Where(e => e.State == EntityState.Added))
+                        entry.State = EntityState.Detached;
                 }
                 var videoCardsToDto = channelsList.MapVideoCardToDto(db,json.Items, json.Etag).First();
                 return TypedResults.Ok(videoCardsToDto);
