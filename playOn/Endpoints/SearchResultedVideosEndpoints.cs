@@ -66,7 +66,7 @@ namespace playOn.Endpoints
                     );
                     //return TypedResults.Ok(new VideoCardListDto { VideoCardList = emptyValue, QueryNextPage = false });
                 }
-                var videosIds = string.Join("%2C",json.Items.Where(v => v.Id != null && !string.IsNullOrEmpty(v.Id.VideoId)).Select(v => v.Id.VideoId).Distinct());
+                var videosIds = string.Join("%2C",json.Items.Where(v => v.Id != null && !string.IsNullOrEmpty(v.Id.VideoId)).DistinctBy(v => v.Id.VideoId).Select(v => v.Id.VideoId));
 
                 //API Call for fetching videos
                 var response2 = await client.GetAsync($"videos?part=snippet%2CcontentDetails%2Cstatistics%2CliveStreamingDetails&id={videosIds}&key={apiKey}");
@@ -109,7 +109,8 @@ namespace playOn.Endpoints
                 }
 
                 //VideoHelpers
-                var dto = await videohelpers.VideosToDtosAsync(json2, json?.NextPageToken,q,page);
+                var updatedKeyEntity = await db.SearchKeys.FirstOrDefaultAsync(k => k.Title == q);
+                var dto = await videohelpers.VideosToDtosAsync(json2, json?.NextPageToken,updatedKeyEntity);
                 var data = new VideoCardListDto { VideoCardList = dto, QueryNextPage = json?.NextPageToken != null };
                 return TypedResults.Ok(data);
             });
