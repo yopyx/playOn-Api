@@ -84,9 +84,9 @@ namespace DataLayer.EfCode
                 .HasIndex(k => k.CId)
                 .IsUnique();
 
-            modelBuilder.Entity<History>()
-                .HasIndex(k => k.UserId)
-                .IsUnique();
+            //modelBuilder.Entity<History>()
+            //    .HasIndex(k => k.UserId)
+            //    .IsUnique();
 
             //modelBuilder.Entity<History_VideoWatched>()
             //    .HasIndex(k => k.HistoryId+k.VideoWatchedId)
