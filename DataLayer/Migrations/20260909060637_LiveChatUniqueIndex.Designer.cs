@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataLayer.Migrations
 {
     [DbContext(typeof(EfCoreContext))]
-    [Migration("20260905051401_LiveChatUniqueIndex")]
+    [Migration("20260909060637_LiveChatUniqueIndex")]
     partial class LiveChatUniqueIndex
     {
         /// <inheritdoc />
@@ -127,8 +127,7 @@ namespace DataLayer.Migrations
 
                     b.HasKey("HistoryId");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("History");
                 });

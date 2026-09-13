@@ -124,8 +124,7 @@ namespace DataLayer.Migrations
 
                     b.HasKey("HistoryId");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("History");
                 });
