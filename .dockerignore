@@ -1,2 +1,7 @@
 **/bin/
 **/obj/
+keycloak/
+.git/
+.github/
+*.md
+docker-compose*.yml
