@@ -25,4 +25,5 @@ RUN chown -R keycloak:keycloak /opt/keycloak/data/import
 USER keycloak
 
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
-CMD ["start", "--optimized"]
+# "--import-realm" is only added for the deployment to work with the realm config committed to the repo. Remove it if you don't want to import the realm config on startup.
+CMD ["start", "--optimized","--import-realm"]
