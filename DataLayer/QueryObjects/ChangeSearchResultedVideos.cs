@@ -12,7 +12,7 @@ namespace DataLayer.QueryObjects
 {
     public static class ChangeSearchResultedVideos
     {
-        public static async Task AddResultsToEntityAsync(this EfCoreContext db, VideoDataFromApi[] videos, IQueryable<Channel> channels, SearchKey? searchKeyEntity, string listEtag,string? token)
+        public static async Task AddResultsToEntityAsync(this EfCoreContext db, VideoDataFromApi[] videos, IQueryable<Channel> channels, SearchKey searchKeyEntity, string listEtag,string? token)
         {
             var hashMap = new Dictionary<string, Channel>();
             foreach (var c in channels)
@@ -20,10 +20,7 @@ namespace DataLayer.QueryObjects
                 hashMap[c.ChId] = c;
             }
             var defaultChannel = await db.Channels.SingleOrDefaultAsync(c => c.ChannelId == 1);
-            if(searchKeyEntity == null)
-            {
-                return;
-            }
+            
             var entities = videos.Select(v => new SearchResultedVideo
             {
                 VId = v.Id,

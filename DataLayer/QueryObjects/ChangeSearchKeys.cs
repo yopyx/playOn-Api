@@ -11,20 +11,22 @@ namespace DataLayer.QueryObjects
 {
     public static class ChangeSearchKeys
     {
-        public static async Task AddkeyToEntityAsync(this EfCoreContext db, string q)
+        public static async Task<SearchKey> AddkeyToEntityAsync(this EfCoreContext db, string q)
         {
             var entity = new SearchKey
             {
                 Title = q,
+                PageNum = 1
             };
 
             await db.SearchKeys.AddAsync(entity);
-            await db.SaveChangesAsync();
+            return entity;
         }
-        public static async Task UpdateKeyEntityAsync(this EfCoreContext db, SearchKey key)
+        public static void UpdateKeyEntityAsync(SearchKey key, int page)
         {
-            key.PageNum++;
-            await db.SaveChangesAsync();
+            if (key.PageNum < page) {
+                key.PageNum++;
+            }
         }
     }
 }
