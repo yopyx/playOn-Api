@@ -36,6 +36,24 @@ namespace playOn.Helpers
                         entry.State = EntityState.Detached;
                 }
             }
+            // Development Environment : IN case of any other exception, we can log it and rethrow it to be handled by the calling code.
+            //catch (DbUpdateException ex)
+            //{
+            //    if (ex.InnerException is PostgresException pg)
+            //    {
+            //        Console.WriteLine(
+            //            $"PostgreSQL error: {pg.SqlState}"
+            //        );
+
+            //        Console.WriteLine(
+            //            $"Constraint: {pg.ConstraintName}"
+            //        );
+            //    }
+
+            //    Console.WriteLine(ex.ToString());
+
+            //    throw;
+            //}
 
             var videoCardsToDto = channels.MapVideoCardToDto(_db,list!.Items, list.Etag);
             return videoCardsToDto;
