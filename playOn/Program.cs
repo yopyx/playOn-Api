@@ -82,7 +82,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("BFFOnly", policy =>
     {
         policy.WithOrigins("http://localhost:7117",
-    "http://127.0.0.1:7117", "http://bff:8080").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+    "http://127.0.0.1:7117", "http://bff:8080", "https://playon-auth.runasp.net").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
     });
 });
 
@@ -109,7 +109,7 @@ if (app.Environment.IsDevelopment()) {
     app.UseDeveloperExceptionPage();
 }
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("BFFOnly");
 app.UseAuthentication();
