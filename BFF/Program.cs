@@ -249,7 +249,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("ClientOnly", policy =>
     {
         policy.WithOrigins("http://localhost:5173",
-    "http://127.0.0.1:5173").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+    "http://127.0.0.1:5173", "https://play0n.vercel.app").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
     });
 });
 
@@ -301,8 +301,7 @@ app.Use(async (ctx, next) =>
     }
 });
 
-//app.UseHttpsRedirection();
-
+app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("ClientOnly");
 app.UseAuthentication();
