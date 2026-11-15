@@ -351,7 +351,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("SearchKeyId");
 
-                    b.HasIndex("VId", "PageNum")
+                    b.HasIndex("VId", "PageNum", "SearchKeyId")
                         .IsUnique();
 
                     b.ToTable("VideoResults");
@@ -475,7 +475,7 @@ namespace DataLayer.Migrations
 
                     b.HasIndex("VideoCategoryId");
 
-                    b.HasIndex("VId", "PageNum")
+                    b.HasIndex("VId", "PageNum", "VideoCategoryId")
                         .IsUnique();
 
                     b.ToTable("Videos");

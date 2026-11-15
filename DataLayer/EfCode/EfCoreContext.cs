@@ -101,7 +101,7 @@ namespace DataLayer.EfCode
                 .IsUnique();
 
             modelBuilder.Entity<SearchResultedVideo>() 
-                .HasIndex(k => new { k.VId, k.PageNum })
+                .HasIndex(k => new { k.VId, k.PageNum,k.SearchKeyId })
                 .IsUnique();
 
             modelBuilder.Entity<SearchSuggestions>() 
@@ -113,7 +113,7 @@ namespace DataLayer.EfCode
                 .IsUnique();
 
             modelBuilder.Entity<Video>() 
-                .HasIndex(k => new { k.VId,k.PageNum })
+                .HasIndex(k => new { k.VId,k.PageNum, k.VideoCategoryId })
                 .IsUnique();
 
             modelBuilder.Entity<VideoCategory>() 
