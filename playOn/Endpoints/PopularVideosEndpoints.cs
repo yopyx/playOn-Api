@@ -18,7 +18,7 @@ namespace playOn.Endpoints
             app.MapGet("/recommended_videos", [Authorize(policy: "ApiUser")] async (IHttpClientFactory factory, IConfiguration configuration, EfCoreContext db, IChannelHelpers helpers, string videoCategoryId, string pageNum) => {
 
                 //Database Query
-                var page = Convert.ToInt16(pageNum);
+                var page = Convert.ToInt16(pageNum) == 0 ? 1 : Convert.ToInt16(pageNum);
                 var categoryEntity = await db.VideoCategories.FirstOrDefaultAsync(c => c.VCId == videoCategoryId);
                 if (categoryEntity==null)
                 {
@@ -28,12 +28,12 @@ namespace playOn.Endpoints
                         statusCode: StatusCodes.Status404NotFound
                     );
                 }
-                if (categoryEntity.PageNum >= page) {
-                    var videoEntities = db.Videos
+                var videoEntities = db.Videos
                         .Where(v => v.VideoCategory.VCId == videoCategoryId && v.PageNum == page)
                         .AsNoTracking()
                         .OrderBy(v => v.VideoId)
                         .Include(v => v.Channel);
+                if (videoEntities.Any()) { //categoryEntity.PageNum >= page
                     var videoDtos = videoEntities.MapVideoEntityToDto();
                     var entity = await videoEntities.FirstOrDefaultAsync();
                     return TypedResults.Ok(new VideoCardListDto { VideoCardList = videoDtos, QueryNextPage = entity?.NextToken != null });
