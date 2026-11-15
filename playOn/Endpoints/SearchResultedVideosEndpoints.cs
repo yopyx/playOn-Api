@@ -23,22 +23,30 @@ namespace playOn.Endpoints
             {
                 //Database Query
                 q = q.Trim().ToLower();
-                var page = Convert.ToInt16(pageNum);
+                var page = Convert.ToInt16(pageNum)==0? 1 : Convert.ToInt16(pageNum);
                 var keyEntity = await db.SearchKeys.FirstOrDefaultAsync(k => k.Title==q);
+
+                //Check if the requested page is greater than the indexed pages (greater than one as diff)
+                if (keyEntity != null && (keyEntity.PageNum+1) < page)
+                {
+                    return Results.Problem(
+                        title: "Unprocessable Entity",
+                        detail: "The requested page has not been indexed yet.",
+                        statusCode: 422
+                    );
+                }
                 //var videoQuery = db.VideoResults.Where(v => v.SearchKey.Title == q && v.PageNum == page);
                 //var count = await videoQuery.CountAsync();
-
-                if (keyEntity!=null && keyEntity.PageNum >= page)
-                {
-                    var videoEntities = db.VideoResults
+                var videoEntities = db.VideoResults
                         .Where(v => v.SearchKey.Title == q && v.PageNum == page)
                         .AsNoTracking()
                         .OrderBy(v => v.SearchResultedVideoId)
                         .Include(v => v.Channel);
-
+                if (videoEntities.Any()) // keyEntity!=null && keyEntity.PageNum >= page
+                {
                     var videoDtos = videoEntities.MapVideoResultEntityToDto();
                     var entry = await videoEntities.FirstOrDefaultAsync();
-                    return TypedResults.Ok(new VideoCardListDto { VideoCardList = videoDtos, QueryNextPage = entry?.NextToken != null });
+                    return TypedResults.Ok(new VideoCardListDto { VideoCardList = videoDtos, QueryNextPage = !string.IsNullOrEmpty(entry?.NextToken) });
                 }
 
                 //API Call for fetching videos ids
@@ -46,7 +54,8 @@ namespace playOn.Endpoints
                 var nextToken = lastEntity?.NextToken;
                 var apiKey = configuration["YouTube:ApiKey"];
                 var client = factory.CreateClient("YouTubeClient");
-                var response = await client.GetAsync($"search?part=snippet&maxResults=25{(nextToken != null ? "&pageToken=" + nextToken : "")}&q={q}&key={apiKey}");
+                var encodedQuery = Uri.EscapeDataString(q);
+                var response = await client.GetAsync($"search?part=snippet&maxResults=25{(nextToken != null ? "&pageToken=" + nextToken : "")}&q={encodedQuery}&key={apiKey}");
                 if (!response.IsSuccessStatusCode)
                 {
                     return Results.Problem(
@@ -90,28 +99,19 @@ namespace playOn.Endpoints
                 }
 
                 //update database
-                try
+                if (keyEntity == null)
                 {
-                    if (keyEntity == null)
-                    {
-                        await db.AddkeyToEntityAsync(q);
-                    }
-                    else
-                    {
-                        await db.UpdateKeyEntityAsync(keyEntity);
-                    }
+                    keyEntity = await db.AddkeyToEntityAsync(q);
                 }
-                catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
+                else
                 {
-                    // Someone else already wrote this — not a real error, just detach and re-read.
-                    foreach (var entry in db.ChangeTracker.Entries().Where(e => e.State == EntityState.Added))
-                        entry.State = EntityState.Detached;
+                    ChangeSearchKeys.UpdateKeyEntityAsync(keyEntity,page);
                 }
+                
 
                 //VideoHelpers
-                var updatedKeyEntity = await db.SearchKeys.FirstOrDefaultAsync(k => k.Title == q);
-                var dto = await videohelpers.VideosToDtosAsync(json2, json?.NextPageToken,updatedKeyEntity);
-                var data = new VideoCardListDto { VideoCardList = dto, QueryNextPage = json?.NextPageToken != null };
+                var dto = await videohelpers.VideosToDtosAsync(json2, json?.NextPageToken,keyEntity);
+                var data = new VideoCardListDto { VideoCardList = dto, QueryNextPage = !string.IsNullOrEmpty(json?.NextPageToken) };
                 return TypedResults.Ok(data);
             });
         }
