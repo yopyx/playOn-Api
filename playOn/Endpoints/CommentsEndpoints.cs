@@ -30,13 +30,14 @@ namespace playOn.Endpoints
                 }
                 var commentQuery = db.Comments.Where(c => c.VideoWatched.VId == videoId);
                 var count = await commentQuery.CountAsync();
-                
-                if (count >= Convert.ToInt16(pageNum) * 20)
+                var page = Convert.ToInt16(pageNum) == 0 ? 1 : Convert.ToInt16(pageNum);
+
+                if (count >= page * 20)
                 {
                     var commentEntities = commentQuery
                         .AsNoTracking()
                         .OrderBy(c => c.CommentId)
-                        .Skip((Convert.ToInt16(pageNum) - 1) * 20)
+                        .Skip((page - 1) * 20)
                         .Take(20);
 
                     var commentsDto = commentEntities.MapCommentEntityToDto();

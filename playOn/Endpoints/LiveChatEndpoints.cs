@@ -30,7 +30,7 @@ namespace playOn.Endpoints
                         statusCode: 404
                     );
                 }
-                var page = Convert.ToInt32(pageNum);
+                var page = Convert.ToInt16(pageNum) == 0 ? 1 : Convert.ToInt16(pageNum);
                 var commentQuery = db.LiveComments.Where(c => c.VideoWatched.VId == videoId);
                 var lastEntity = await commentQuery.OrderByDescending(c => c.LiveChatCommentId).FirstOrDefaultAsync();
                 var nextToken = lastEntity?.NextToken;
