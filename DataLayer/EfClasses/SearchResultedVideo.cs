@@ -23,7 +23,7 @@ namespace DataLayer.EfClasses
         public string Etag { get; set; } = string.Empty;
         public string ListEtag { get; set; } = string.Empty;
         public string? NextToken { get; set; }
-        public int PageNum { get; set; }
+        public int PageNum { get; set; } = 1;
 
         //Relationships
         public int ChannelId { get; set; }
