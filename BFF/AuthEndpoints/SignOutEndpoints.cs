@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using static BFF.Utils;
+using static BFF.Models;
 
 namespace BFF.AuthEndpoints
 {
@@ -30,10 +31,10 @@ namespace BFF.AuthEndpoints
 
                 //http.Session.Clear();
                 //await http.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                
+
                 //return Results.Redirect(logoutUrl);
-                var idToken = http.Session.GetString("id_token");
-                return await SignOut(http, configuration, idToken);
+                var tokenStore = http.RequestServices.GetRequiredService<ITokenStore>();
+                return await SignOut(http, configuration, tokenStore);
             }).WithName("SignOutEndpoint").WithDisplayName("SignOutEndpoint");
         }
     }

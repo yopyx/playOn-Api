@@ -10,7 +10,14 @@ namespace BFF
 {
     public static class Utils
     {
-        public static async Task<IResult> SignOut(HttpContext http, IConfiguration configuration,string? idToken) {
+        public static async Task<IResult> SignOut(HttpContext http, IConfiguration configuration, ITokenStore tokenStore) {
+            var sessionId = http.Session.Id;
+            var tokensData = await tokenStore.GetAsync(sessionId);
+            var idToken = tokensData?.IdToken;
+
+            // Remove the custom token record.
+            await tokenStore.RemoveAsync(sessionId);
+
             // for containers, you may need to use the internal network address of the Keycloak server instead of localhost
             var logoutUrl = $"{configuration["OIDC:Authority"]}/protocol/openid-connect/logout" +
             $"?id_token_hint={idToken}" +
