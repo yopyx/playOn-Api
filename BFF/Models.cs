@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using Microsoft.Extensions.Caching.Distributed;
 using static BFF.Models;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -81,17 +82,17 @@ namespace BFF
             {
                 var sessionId = httpContext.Session.Id; // Assuming session ID is used as the key for token storage
                 var userId = httpContext.User?.FindFirst("sub")?.Value; // used as key instead of sessionId if you want to store tokens per user instead of per session
-                if (string.IsNullOrEmpty(userId))
+                if (string.IsNullOrEmpty(sessionId))
                 {
-                    _logger.LogWarning("No 'sub' claim on principal — cannot look up tokens");
+                    _logger.LogWarning("No session ID found — cannot look up tokens");
                     return null;
                 }
 
-                var tokensData = await _tokenStore.GetAsync(userId, ct);
+                var tokensData = await _tokenStore.GetAsync(sessionId, ct);
 
                 if (tokensData is null)
                 {
-                    _logger.LogWarning("No tokens found for user {UserId}", userId);
+                    _logger.LogWarning("No tokens found for user {UserId}", sessionId);
                     return null;
                 }
 
@@ -103,11 +104,11 @@ namespace BFF
                 {
                     return tokensData.AccessToken;
                 }
-                return await WithSessionLockAsync(userId, tokensData, needsRefresh, ct);
+                return await WithSessionLockAsync(sessionId, needsRefresh, ct);
             }
 
             //private async Task<string?> RefreshAsync() in case we return just access token
-            private async Task<string?> RefreshAsync(string userId, string refreshToken, CancellationToken ct)
+            private async Task<string?> RefreshAsync(string sessionId, string refreshToken, CancellationToken ct)
             {
                 //var client = _httpClientFactory.CreateClient("KeycloakClient");
                 var client = _httpClientFactory.CreateClient();
@@ -122,9 +123,9 @@ namespace BFF
                     ct);
 
                 if (!response.IsSuccessStatusCode) {
-                    _logger.LogWarning("Failed to refresh token for user {UserId}", userId);
-                    await _tokenStore.RemoveAsync(userId, ct);
-                    _sessionLocks.TryRemove(userId, out _); // session is dead, drop the lock
+                    _logger.LogWarning("Failed to refresh token for user {sessionId}", sessionId);
+                    await _tokenStore.RemoveAsync(sessionId, ct);
+                    _sessionLocks.TryRemove(sessionId, out _); // session is dead, drop the lock
                     return null; // Caller should sign out
                 }
 
@@ -137,11 +138,11 @@ namespace BFF
                     LastIntrospectedAt: DateTimeOffset.UtcNow
                 );
 
-                await _tokenStore.SaveAsync(userId, newTokenData, ct);
+                await _tokenStore.SaveAsync(sessionId, newTokenData, ct);
                 return newTokenData.AccessToken;
             }
 
-            private async Task<string?> IntrospectAsync(string userId, TokenData tokenData, CancellationToken ct) {
+            private async Task<string?> IntrospectAsync(string sessionId, TokenData tokenData, CancellationToken ct) {
                 //var client = _httpClientFactory.CreateClient("KeycloakClient");
                 var client = _httpClientFactory.CreateClient();
                 var response = await client.PostAsync(@$"{_config["OIDC:Authority"]}/protocol/openid-connect/token/introspect",
@@ -158,7 +159,7 @@ namespace BFF
                 {
                     _logger.LogWarning(
                         "Introspect HTTP error for user {UserId}: {Status}",
-                        userId, response.StatusCode);
+                        sessionId, response.StatusCode);
                     return tokenData.AccessToken; // Keycloak unreachable — fail open, keep token
                 }
 
@@ -170,47 +171,51 @@ namespace BFF
                     // Session was revoked server-side (admin logout, forced session end, etc.)
                     _logger.LogWarning(
                         "Token is no longer active for user {UserId} — session revoked",
-                        userId);
+                        sessionId);
 
-                    await _tokenStore.RemoveAsync(userId, ct);
-                    _sessionLocks.TryRemove(userId, out _); // session is dead, drop the lock
+                    await _tokenStore.RemoveAsync(sessionId, ct);
+                    _sessionLocks.TryRemove(sessionId, out _); // session is dead, drop the lock
                     return null; // triggers 401 + SignOut in middleware
 
                 }
                 // Update introspection timestamp
                 var updatedTokenData = tokenData with { LastIntrospectedAt = DateTimeOffset.UtcNow };
-                await _tokenStore.SaveAsync(userId, updatedTokenData, ct);
+                await _tokenStore.SaveAsync(sessionId, updatedTokenData, ct);
 
                 _logger.LogDebug(
                     "Token confirmed active for user {UserId}, next check at {NextCheck}",
-                    userId, updatedTokenData.LastIntrospectedAt + _introspectInterval);
+                    sessionId, updatedTokenData.LastIntrospectedAt + _introspectInterval);
                 return updatedTokenData.AccessToken;
             }
 
-            private async Task<string?> WithSessionLockAsync(string userId, TokenData tokenData, bool needsRefresh, CancellationToken ct)
+            private async Task<string?> WithSessionLockAsync(string sessionId, bool needsRefresh, CancellationToken ct)
             {
-                var semaphore = _sessionLocks.GetOrAdd(userId, _ => new SemaphoreSlim(1, 1));
+                var semaphore = _sessionLocks.GetOrAdd(sessionId, _ => new SemaphoreSlim(1, 1));
                 await semaphore.WaitAsync(ct);
                 try
                 {
                     // Re-fetch in case it was updated while waiting
-                    tokenData = await _tokenStore.GetAsync(userId, ct) ?? tokenData;
-                    needsRefresh = DateTimeOffset.UtcNow >= tokenData.ExpiresAt - ClockSkew;
+                    //tokenData = await _tokenStore.GetAsync(sessionId, ct);
+                    var latestTokens = await _tokenStore.GetAsync(sessionId, ct);
+                    if (latestTokens is null)
+                    {
+                        return null;
+                    }
+                    needsRefresh = DateTimeOffset.UtcNow >= latestTokens.ExpiresAt - ClockSkew;
                     var needsIntrospection = !needsRefresh 
-                        && DateTimeOffset.UtcNow >= tokenData.LastIntrospectedAt+_introspectInterval;
+                        && DateTimeOffset.UtcNow >= latestTokens.LastIntrospectedAt+_introspectInterval;
                     if (!needsRefresh && !needsIntrospection) {
-                        return tokenData.AccessToken; // Another request already refreshed it
+                        return latestTokens.AccessToken; // Another request already refreshed it
                     }else if (needsRefresh)
                     {
-                        return await RefreshAsync(userId, tokenData.RefreshToken, ct);
+                        return await RefreshAsync(sessionId, latestTokens.RefreshToken, ct);
                     } else if (needsIntrospection)
                     {
-                        return await IntrospectAsync(userId, tokenData, ct);
-                        //return accessToken;
+                        return await IntrospectAsync(sessionId, latestTokens, ct);
                     }
 
                     // Token was refreshed by a concurrent request while this one waited on the semaphore
-                    return tokenData.AccessToken;
+                    return latestTokens.AccessToken;
                 }
                 finally
                 {
