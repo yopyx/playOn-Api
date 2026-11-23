@@ -11,7 +11,8 @@ namespace BFF.AuthEndpoints
         {
             app.MapGet("/login", () =>
             {
-                return Results.Challenge(new AuthenticationProperties { RedirectUri = $"{app.Configuration["Bff:BaseUrl"]}/spa/main_page" },
+                // RedirectUri = $"{app.Configuration["Bff:BaseUrl"]}/spa/main_page"
+                return Results.Challenge(new AuthenticationProperties { RedirectUri = app.Configuration["SPA:LandingPagePostLogin"] },
                               [OpenIdConnectDefaults.AuthenticationScheme]);
             });
         }
