@@ -39,7 +39,7 @@ builder.Services.AddSession(options => {
     options.Cookie.IsEssential = true; // Required for GDPR compliance if the session is essential for the app to function
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.Cookie.SameSite = SameSiteMode.None;    //lax    // Required for external OIDC sign-in
+    options.Cookie.SameSite = SameSiteMode.Lax;    //None    // Required for external OIDC sign-in
     options.IdleTimeout = TimeSpan.FromHours(1);   // was TimeSpan.FromMinutes(30);
 
 });
@@ -54,7 +54,7 @@ builder.Services.AddAuthentication(options =>
     options.Cookie.Name = "auth_cookie";
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.Cookie.SameSite = SameSiteMode.None;        // Required for external OIDC sign-in
+    options.Cookie.SameSite = SameSiteMode.Lax;        // Required for external OIDC sign-in
     options.ExpireTimeSpan = TimeSpan.FromHours(1); // Session cookie lifetime _ was TimeSpan.FromMinutes(30);
     options.SlidingExpiration = true;                  // Renew cookie if nearly expired
     //options.LoginPath = "/";
@@ -129,39 +129,41 @@ builder.Services.AddAuthentication(options =>
     {
         OnTokenResponseReceived = async context =>
         {
-            // ? This Set() call is what actually causes the session cookie
-            // to be written into the redirect response back to the browser
+            await context.HttpContext.Session.LoadAsync();
+
+            // Ensure the ASP.NET Core session is non-empty.
+            // For a new session, Set() triggers SessionMiddleware to establish
+            // the session and issue its protected session cookie when the response starts.
+            // The session is then persisted in the distributed cache, allowing
+            // subsequent requests to recover the same Session.Id used by TokenStore.
             context.HttpContext.Session.SetString("bff:active", "1");
 
             var tokenStore = context.HttpContext.RequestServices
                 .GetRequiredService<ITokenStore>();
 
-            // Use the session ID as the store key
-            await context.HttpContext.Session.LoadAsync();
-
-            // getting sessionId
+            // getting sessionId : Use the session ID as the store key
             var sessionId = context.HttpContext.Session.Id; // sessionId is unique per user session, but it can change after expiry and re-login, so we don't use it as the key to store tokens in the distributed cache
             var rawIdTokenStr = context.TokenEndpointResponse.IdToken;
 
             // Store id_token for logout hint
-            context.HttpContext.Session.SetString(
-                "id_token",
-                rawIdTokenStr  // ? the raw id_token string
-            );
+            //context.HttpContext.Session.SetString(
+            //    "id_token",
+            //    rawIdTokenStr  // ? the raw id_token string
+            //);
 
             // pull "sub" straight off the raw id_token.
             // OnTokenValidated hasn't run yet at this point in the pipeline, so context.Principal isn't populated —
             // reading the JWT directly is the reliable way to get a stable id this early.
-            var idToken = new JwtSecurityTokenHandler().ReadJwtToken(rawIdTokenStr);
-            var stableUserId = idToken.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-            if (string.IsNullOrEmpty(stableUserId)) return;  // spec-compliant IdP always sends this, but don't store under null
+            // var idToken = new JwtSecurityTokenHandler().ReadJwtToken(rawIdTokenStr);
+            // var stableUserId = idToken.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (string.IsNullOrEmpty(sessionId)) return;  // spec-compliant IdP always sends this, but don't store under null
             
             var expiresIn = int.TryParse(context.TokenEndpointResponse.ExpiresIn, out var seconds)
                 ? seconds : 3600;
 
             // we used stableUserId(instead of sessionId-which can be changed after expiry-) as the key to store the tokens
             // in the distributed cache, so that we can retrieve them later for token refresh
-            await tokenStore.SaveAsync(stableUserId, new TokenData(
+            await tokenStore.SaveAsync(sessionId, new TokenData(
                 AccessToken: context.TokenEndpointResponse.AccessToken,
                 RefreshToken: context.TokenEndpointResponse.RefreshToken,
                 IdToken: rawIdTokenStr,
@@ -170,7 +172,16 @@ builder.Services.AddAuthentication(options =>
         },
         OnRedirectToIdentityProvider = context =>
         {
-            if(context.Request.Path.StartsWithSegments("/api") || context.Request.Path.StartsWithSegments("/user_profile"))
+            // Change the redirect URI for production if needed, e.g., if the app is behind a reverse proxy or deployed to a different domain.
+            // redirect to vercel for external rewrites that would forward to the BFF's /signin-oidc endpoint bypass the third party cookies 
+            // block in incognito mode, which would otherwise prevent the OIDC flow from completing successfully.
+            if (builder.Environment.IsProduction())
+            {
+                context.ProtocolMessage.RedirectUri =
+                    "https://play0n.vercel.app/signin-oidc";
+            }
+
+            if (context.Request.Path.StartsWithSegments("/api") || context.Request.Path.StartsWithSegments("/user_profile"))
             {
                 // Prevent redirect loops in API calls
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -186,11 +197,13 @@ builder.Services.AddAuthentication(options =>
             // Use the session ID as the store key
             await context.HttpContext.Session.LoadAsync();
             var sessionId = context.HttpContext.Session.Id; // sessionId is unique per user session, but it can change after expiry and re-login, so we don't use it as the key to store tokens in the distributed cache
-            var stableUserId = context.HttpContext.User.FindFirst("sub")?.Value;
+            
+            //var stableUserId = context.HttpContext.User.FindFirst("sub")?.Value;
+            
             // Clean up tokens on logout
-            if(!string.IsNullOrEmpty(stableUserId))
+            if(!string.IsNullOrEmpty(sessionId))
             {
-                await tokenStore.RemoveAsync(stableUserId);
+                await tokenStore.RemoveAsync(sessionId);
             }
         },
 
