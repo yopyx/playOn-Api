@@ -125,7 +125,7 @@ namespace BFF
                 if (!response.IsSuccessStatusCode) {
                     _logger.LogWarning("Failed to refresh token for user {sessionId}", sessionId);
                     await _tokenStore.RemoveAsync(sessionId, ct);
-                    _sessionLocks.TryRemove(sessionId, out _); // session is dead, drop the lock
+                    //_sessionLocks.TryRemove(sessionId, out _); // session is dead, drop the lock
                     return null; // Caller should sign out
                 }
 
@@ -174,7 +174,7 @@ namespace BFF
                         sessionId);
 
                     await _tokenStore.RemoveAsync(sessionId, ct);
-                    _sessionLocks.TryRemove(sessionId, out _); // session is dead, drop the lock
+                    //_sessionLocks.TryRemove(sessionId, out _); // session is dead, drop the lock
                     return null; // triggers 401 + SignOut in middleware
 
                 }
